@@ -210,7 +210,7 @@ npm install chart.js svelte-chartjs
 npm install date-fns
 
 # Icons (Lucide Svelte)
-npm install lucide-svelte
+npm install @lucide/svelte
 
 # Animation library (optional, for advanced animations)
 npm install svelte-motion
@@ -1307,7 +1307,7 @@ Create `src/lib/components/Header.svelte`:
 <script lang="ts">
   import { dateRange, previousWeek, nextWeek, refreshWorkData } from '$lib/stores';
   import { Button } from '$lib/components/ui/button';
-  import { ChevronLeft, ChevronRight, RefreshCw, Moon, Sun } from 'lucide-svelte';
+  import { ChevronLeft, ChevronRight, RefreshCw, Moon, Sun } from '@lucide/svelte';
   import { theme } from '$lib/stores/ui';
   import { format } from 'date-fns';
   import { fade } from 'svelte/transition';
@@ -1377,7 +1377,7 @@ Create `src/lib/components/FloatingReport.svelte`:
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
-  import { Copy, X, Download } from 'lucide-svelte';
+  import { Copy, X, Download } from '@lucide/svelte';
   import { currentWeekData, dateRange } from '$lib/stores';
   import { dollarRate, shortDescription } from '$lib/stores/settings';
   import { addNotification } from '$lib/stores/ui';
@@ -1630,7 +1630,7 @@ Create `src/lib/components/ErrorAlert.svelte`:
 ```svelte
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { AlertCircle } from 'lucide-svelte';
+  import { AlertCircle } from '@lucide/svelte';
 
   export let message: string;
   export let onRetry: (() => void) | undefined = undefined;
@@ -2160,7 +2160,7 @@ npx shadcn-svelte@latest init
 npx shadcn-svelte@latest add button card input label progress badge resizable separator switch sonner
 
 # Install other dependencies
-npm install chart.js svelte-chartjs date-fns lucide-svelte papaparse
+npm install chart.js svelte-chartjs date-fns @lucide/svelte papaparse
 npm install -D @types/papaparse @tailwindcss/typography
 
 # Create .env file with API configuration

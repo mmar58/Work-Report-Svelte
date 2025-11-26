@@ -1,2 +1,44 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import Header from '$lib/components/Header.svelte';
+	import WorkGoalTracker from '$lib/components/WorkGoalTracker.svelte';
+	import TimeReport from '$lib/components/TimeReport.svelte';
+	import FloatingReport from '$lib/components/FloatingReport.svelte';
+	import {
+		loadWorkData,
+		syncHourlyRateFromAPI,
+		syncTargetHoursFromAPI,
+		fetchCurrencyRate
+	} from '$lib/stores';
+
+	onMount(async () => {
+		// Initialize all data on mount
+		await Promise.all([
+			loadWorkData(),
+			syncHourlyRateFromAPI(),
+			syncTargetHoursFromAPI(),
+			fetchCurrencyRate()
+		]);
+	});
+</script>
+
+<div class="flex flex-col h-screen">
+	<Header />
+	
+	<main class="flex-1 overflow-hidden">
+		<div class="container mx-auto h-full p-4">
+			<div class="grid lg:grid-cols-2 gap-4 h-full">
+				<!-- Left Column -->
+				<div class="space-y-4 overflow-y-auto">
+					<WorkGoalTracker />
+					<FloatingReport />
+				</div>
+				
+				<!-- Right Column -->
+				<div class="overflow-y-auto">
+					<TimeReport />
+				</div>
+			</div>
+		</div>
+	</main>
+</div>
