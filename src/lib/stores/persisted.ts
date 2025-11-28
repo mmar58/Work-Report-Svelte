@@ -12,7 +12,19 @@ interface PersistedData<T> {
 export function persisted<T>(key: string, initialValue: T): Writable<T> {
 	// Get initial value from localStorage if in browser
 	const stored = browser ? localStorage.getItem(key) : null;
-	const data = stored ? (JSON.parse(stored) as T) : initialValue;
+	let data: T;
+	
+	try {
+		data = stored ? (JSON.parse(stored) as T) : initialValue;
+	} catch (e) {
+		// Handle invalid JSON - use the raw value if it's a string, otherwise use initialValue
+		console.warn(`Failed to parse localStorage key "${key}". Resetting to initial value.`, e);
+		data = initialValue;
+		// Clean up the invalid localStorage entry
+		if (browser && stored) {
+			localStorage.setItem(key, JSON.stringify(initialValue));
+		}
+	}
 
 	const store = writable<T>(data);
 
