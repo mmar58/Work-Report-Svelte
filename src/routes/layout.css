@@ -119,3 +119,78 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom smooth animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, textarea, select {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Card animations on load */
+[data-card] {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Stagger animation for multiple cards */
+[data-card]:nth-child(1) {
+  animation-delay: 0ms;
+}
+[data-card]:nth-child(2) {
+  animation-delay: 100ms;
+}
+[data-card]:nth-child(3) {
+  animation-delay: 200ms;
+}
+[data-card]:nth-child(4) {
+  animation-delay: 300ms;
+}
+
+/* Smooth scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
+}

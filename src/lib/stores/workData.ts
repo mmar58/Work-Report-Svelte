@@ -199,24 +199,25 @@ export function previousPeriod() {
 
 // Set view mode and refresh data
 export function setViewMode(mode: ViewMode) {
+	const currentRange = get(dateRange);
 	viewMode.set(mode);
 
-	// Recalculate date range based on new mode
-	const now = new Date();
+	// Recalculate date range based on new mode, keeping the current reference date
+	const referenceDate = currentRange.startDate;
 	let newStart: Date, newEnd: Date;
 
 	switch (mode) {
 		case 'week':
-			newStart = startOfWeek(now, { weekStartsOn: 1 });
-			newEnd = endOfWeek(now, { weekStartsOn: 1 });
+			newStart = startOfWeek(referenceDate, { weekStartsOn: 1 });
+			newEnd = endOfWeek(referenceDate, { weekStartsOn: 1 });
 			break;
 		case 'month':
-			newStart = startOfMonth(now);
-			newEnd = endOfMonth(now);
+			newStart = startOfMonth(referenceDate);
+			newEnd = endOfMonth(referenceDate);
 			break;
 		case 'year':
-			newStart = startOfYear(now);
-			newEnd = endOfYear(now);
+			newStart = startOfYear(referenceDate);
+			newEnd = endOfYear(referenceDate);
 			break;
 	}
 

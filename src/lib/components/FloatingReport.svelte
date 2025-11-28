@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Card } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import { Check, Copy } from '@lucide/svelte';
+	import { Check, Copy, FileText } from '@lucide/svelte';
 	import { settings, dateRange } from '$lib/stores';
 	import { currentWeekData } from '$lib/stores';
 	import { generateWorkReport } from '$lib/utils/calculations';
@@ -40,13 +40,20 @@
 	}
 </script>
 
-<Card class="p-6">
+<Card class="p-6 overflow-hidden">
 	<div class="space-y-4">
 		<div class="flex items-center justify-between">
-			<h3 class="text-lg font-semibold">Work Report</h3>
-			<Button size="sm" on:click={copyReport}>
+			<div class="flex items-center gap-2">
+				<FileText class="h-5 w-5 text-primary" />
+				<h3 class="text-lg font-semibold">Work Report</h3>
+			</div>
+			<Button 
+				size="sm" 
+				onclick={copyReport}
+				class="transition-all duration-200 {copied ? 'bg-green-600 hover:bg-green-700' : ''}"
+			>
 				{#if copied}
-					<Check class="h-4 w-4 mr-2" />
+					<Check class="h-4 w-4 mr-2 animate-in zoom-in duration-200" />
 					Copied!
 				{:else}
 					<Copy class="h-4 w-4 mr-2" />
@@ -55,16 +62,29 @@
 			</Button>
 		</div>
 
-		<div>
-			<Label for="description">Short Description</Label>
+		<div class="space-y-2">
+			<Label for="description" class="text-sm font-medium">Short Description</Label>
 			<Input
 				id="description"
 				value={$settings.shortDescription}
-				on:input={handleDescriptionChange}
+				oninput={handleDescriptionChange}
 				placeholder="Enter work description..."
+				class="transition-all duration-200 focus:ring-2 focus:ring-primary"
 			/>
 		</div>
 
-		<Textarea value={report} rows={12} readonly class="font-mono text-sm" />
+		<div class="relative">
+			<Textarea 
+				value={report} 
+				rows={12} 
+				readonly 
+				class="font-mono text-sm bg-muted/30 transition-all duration-200 hover:bg-muted/50" 
+			/>
+			{#if copied}
+				<div class="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded-md text-xs font-medium animate-in fade-in slide-in-from-top-2 duration-300">
+					✓ Copied to clipboard
+				</div>
+			{/if}
+		</div>
 	</div>
 </Card>

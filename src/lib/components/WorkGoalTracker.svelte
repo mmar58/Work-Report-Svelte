@@ -15,6 +15,8 @@
 		calculateRequiredHoursPerDay,
 		calculateProgress
 	} from '$lib/utils/calculations';
+	import CircularProgress from './CircularProgress.svelte';
+	import { Target, DollarSign, Clock, Edit, Check, X, Zap } from '@lucide/svelte';
 
 	let editingRate = false;
 	let editingTarget = false;
@@ -48,76 +50,122 @@
 		$currentWeekData.totalMinutes,
 		remainingDays
 	);
+	$: hoursWorked = $currentWeekData.totalMinutes / 60;
 </script>
 
-<Card class="p-6">
+<Card class="p-6 overflow-hidden">
 	<div class="space-y-6">
-		<!-- Progress Bar -->
-		<div>
-			<div class="flex items-center justify-between mb-2">
-				<h3 class="text-sm font-medium">Weekly Progress</h3>
-				<Badge variant={progress >= 100 ? 'default' : 'secondary'}>
-					{progress}%
-				</Badge>
+		<!-- Header -->
+		<div class="flex items-center justify-between">
+			<div class="flex items-center gap-2">
+				<Target class="h-5 w-5 text-primary" />
+				<h3 class="text-lg font-semibold">Weekly Goal</h3>
 			</div>
-			<Progress value={progress} class="h-2" />
+			<Badge variant={progress >= 100 ? 'default' : 'secondary'} class="animate-in fade-in duration-300">
+				{progress}%
+			</Badge>
 		</div>
 
-		<!-- Time Stats -->
-		<div class="grid grid-cols-2 gap-4">
-			<div>
-				<p class="text-sm text-muted-foreground">Hours Worked</p>
-				<p class="text-2xl font-bold">{formatDuration($currentWeekData.totalMinutes)}</p>
+		<!-- Circular Progress Center -->
+		<div class="flex justify-center py-4">
+			<div class="relative">
+				<CircularProgress 
+					value={hoursWorked} 
+					max={$settings.targetHours} 
+					size={200}
+					strokeWidth={16}
+					showPercentage={false}
+				/>
+				<div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+					<div class="text-3xl font-bold">
+						{hoursWorked.toFixed(1)}h
+					</div>
+					<div class="text-sm text-muted-foreground mt-1">
+						of {$settings.targetHours}h
+					</div>
+				</div>
 			</div>
-			<div>
-				<p class="text-sm text-muted-foreground">Target Hours</p>
-				<div class="flex items-center gap-2">
-					{#if editingTarget}
+		</div>
+
+		<!-- Progress Bar -->
+		<div class="space-y-2">
+			<Progress value={progress} class="h-3 transition-all duration-500" />
+			<div class="flex items-center justify-between text-xs text-muted-foreground">
+				<span>0h</span>
+				<span class="font-medium text-primary">{formatDuration($currentWeekData.totalMinutes)}</span>
+				<span>{$settings.targetHours}h</span>
+			</div>
+		</div>
+
+		<!-- Stats Grid -->
+		<div class="grid grid-cols-2 gap-4">
+			<!-- Target Hours Card -->
+			<div class="p-4 bg-gradient-to-br from-muted to-muted/50 rounded-xl border transition-all duration-300 hover:shadow-md">
+				<div class="flex items-center gap-2 mb-2">
+					<Target class="h-4 w-4 text-primary" />
+					<p class="text-xs text-muted-foreground font-medium">Target</p>
+				</div>
+				{#if editingTarget}
+					<div class="flex items-center gap-1">
 						<Input
 							type="number"
 							bind:value={targetInput}
-							class="w-20 h-8"
+							class="w-16 h-8 text-sm"
 							min="0"
 							max="168"
 						/>
-						<Button size="sm" on:click={saveTargetHours}>Save</Button>
-						<Button size="sm" variant="ghost" on:click={() => (editingTarget = false)}>
-							Cancel
+						<Button size="icon-sm" variant="ghost" onclick={saveTargetHours}>
+							<Check class="h-3 w-3" />
 						</Button>
-					{:else}
-						<p class="text-2xl font-bold">{$settings.targetHours}h</p>
-						<Button size="sm" variant="ghost" on:click={() => (editingTarget = true)}>
-							Edit
+						<Button size="icon-sm" variant="ghost" onclick={() => (editingTarget = false)}>
+							<X class="h-3 w-3" />
 						</Button>
-					{/if}
+					</div>
+				{:else}
+					<div class="flex items-center gap-2">
+						<p class="text-xl font-bold">{$settings.targetHours}h</p>
+						<Button size="icon-sm" variant="ghost" onclick={() => (editingTarget = true)}>
+							<Edit class="h-3 w-3" />
+						</Button>
+					</div>
+				{/if}
+			</div>
+
+			<!-- Hourly Rate Card -->
+			<div class="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 rounded-xl border border-green-200 dark:border-green-800 transition-all duration-300 hover:shadow-md">
+				<div class="flex items-center gap-2 mb-2">
+					<DollarSign class="h-4 w-4 text-green-600 dark:text-green-400" />
+					<p class="text-xs text-muted-foreground font-medium">Hourly Rate</p>
 				</div>
+				{#if editingRate}
+					<div class="flex items-center gap-1">
+						<Input type="number" bind:value={rateInput} class="w-16 h-8 text-sm" min="0" step="0.5" />
+						<Button size="icon-sm" variant="ghost" onclick={saveHourlyRate}>
+							<Check class="h-3 w-3" />
+						</Button>
+						<Button size="icon-sm" variant="ghost" onclick={() => (editingRate = false)}>
+							<X class="h-3 w-3" />
+						</Button>
+					</div>
+				{:else}
+					<div class="flex items-center gap-2">
+						<p class="text-xl font-bold text-green-700 dark:text-green-300">${$settings.hourlyRate}</p>
+						<Button size="icon-sm" variant="ghost" onclick={() => (editingRate = true)}>
+							<Edit class="h-3 w-3" />
+						</Button>
+					</div>
+				{/if}
 			</div>
 		</div>
 
-		<!-- Earnings -->
-		<div>
-			<div class="flex items-center justify-between mb-2">
-				<p class="text-sm text-muted-foreground">Total Earnings</p>
-				{#if !editingRate}
-					<Button size="sm" variant="ghost" on:click={() => (editingRate = true)}>
-						Edit Rate
-					</Button>
-				{/if}
+		<!-- Earnings Section -->
+		<div class="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/20">
+			<div class="flex items-center gap-2 mb-3">
+				<DollarSign class="h-4 w-4 text-primary" />
+				<p class="text-sm text-muted-foreground font-medium">Total Earnings</p>
 			</div>
-			
-			{#if editingRate}
-				<div class="flex items-center gap-2 mb-2">
-					<Label>Hourly Rate ($):</Label>
-					<Input type="number" bind:value={rateInput} class="w-24" min="0" step="0.5" />
-					<Button size="sm" on:click={saveHourlyRate}>Save</Button>
-					<Button size="sm" variant="ghost" on:click={() => (editingRate = false)}>
-						Cancel
-					</Button>
-				</div>
-			{/if}
-			
 			<div class="space-y-1">
-				<p class="text-xl font-bold">{formatMoney(earningsUSD, 'USD')}</p>
+				<p class="text-2xl font-bold text-primary">{formatMoney(earningsUSD, 'USD')}</p>
 				<p class="text-sm text-muted-foreground">
 					৳{earningsBDT.toLocaleString('en-US', { maximumFractionDigits: 0 })} BDT
 				</p>
@@ -127,15 +175,24 @@
 		<!-- Remaining Work -->
 		{#if remainingDays > 0 && requiredHoursPerDay > 0}
 			<div class="border-t pt-4">
-				<p class="text-sm text-muted-foreground mb-2">To Meet Target</p>
+				<div class="flex items-center gap-2 mb-3">
+					<Zap class="h-4 w-4 text-amber-500" />
+					<p class="text-sm font-medium">To Meet Target</p>
+				</div>
 				<div class="grid grid-cols-2 gap-4">
-					<div>
-						<p class="text-xs text-muted-foreground">Days Remaining</p>
-						<p class="text-lg font-semibold">{remainingDays}</p>
+					<div class="p-3 bg-muted/50 rounded-lg">
+						<div class="flex items-center gap-2 mb-1">
+							<Clock class="h-3 w-3 text-muted-foreground" />
+							<p class="text-xs text-muted-foreground">Days Left</p>
+						</div>
+						<p class="text-2xl font-semibold">{remainingDays}</p>
 					</div>
-					<div>
-						<p class="text-xs text-muted-foreground">Hours Needed/Day</p>
-						<p class="text-lg font-semibold">
+					<div class="p-3 bg-muted/50 rounded-lg">
+						<div class="flex items-center gap-2 mb-1">
+							<Zap class="h-3 w-3 text-amber-500" />
+							<p class="text-xs text-muted-foreground">Needed/Day</p>
+						</div>
+						<p class="text-2xl font-semibold text-amber-600 dark:text-amber-400">
 							{requiredHoursPerDay.toFixed(1)}h
 						</p>
 					</div>

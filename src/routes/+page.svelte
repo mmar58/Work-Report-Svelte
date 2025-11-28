@@ -27,15 +27,19 @@
 	
 	<main class="flex-1 overflow-hidden">
 		<div class="container mx-auto h-full p-4">
-			<div class="grid lg:grid-cols-2 gap-4 h-full">
+			<div class="grid lg:grid-cols-2 gap-6 h-full">
 				<!-- Left Column -->
-				<div class="space-y-4 overflow-y-auto">
-					<WorkGoalTracker />
-					<FloatingReport />
+				<div class="space-y-6 overflow-y-auto">
+					<div data-card>
+						<WorkGoalTracker />
+					</div>
+					<div data-card>
+						<FloatingReport />
+					</div>
 				</div>
 				
 				<!-- Right Column -->
-				<div class="overflow-y-auto">
+				<div class="overflow-y-auto" data-card>
 					<TimeReport />
 				</div>
 			</div>
