@@ -47,9 +47,27 @@ export const isLoading = derived(workDataState, ($state) => $state.isLoading);
 
 export const error = derived(workDataState, ($state) => $state.error);
 
-// Helper function to calculate totals from entries
-function calculateTotals(entries: WorkEntry[]): WorkData {
-	const totalMinutes = entries.reduce((sum, entry) => sum + entry.duration, 0);
+// Helper function to calculate totals from backend API response
+// Backend returns: { date, hours, minutes, seconds, detailedWork, extraminutes }
+function calculateTotalsFromBackend(backendData: any[]): WorkData {
+	let totalMinutes = 0;
+	const entries: WorkEntry[] = [];
+
+	backendData.forEach((item) => {
+		// Calculate duration in minutes from backend data
+		const duration = (item.hours || 0) * 60 + (item.minutes || 0);
+		totalMinutes += duration;
+
+		// Transform backend format to WorkEntry format
+		entries.push({
+			date: item.date,
+			startTime: '',
+			endTime: '',
+			duration: duration,
+			description: item.detailedWork || ''
+		});
+	});
+
 	return {
 		entries,
 		totalHours: Math.floor(totalMinutes / 60),
@@ -68,7 +86,10 @@ export async function fetchWorkData(start: Date, end: Date): Promise<WorkData> {
 			throw new Error('Failed to fetch work data');
 		}
 		const data = await response.json();
-		return calculateTotals(data.workData || []);
+		
+		// Backend returns { workData: [...] }
+		const backendData = data.workData || [];
+		return calculateTotalsFromBackend(backendData);
 	} catch (error) {
 		console.error('Error fetching work data:', error);
 		return { entries: [], totalHours: 0, totalMinutes: 0 };
