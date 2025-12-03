@@ -42,19 +42,11 @@ export async function syncHourlyRateFromAPI() {
 }
 
 export async function updateHourlyRate(rate: number) {
-	try {
-		const response = await fetch(`/api/hourly-rate?rate=${rate}`, {
-			method: 'POST'
-		});
-		if (response.ok) {
-			hourlyRate.set(rate);
-			return true;
-		}
-		return false;
-	} catch (error) {
-		console.error('Failed to update hourly rate:', error);
-		return false;
-	}
+	// Note: Backend doesn't support updating hourly rate via API
+	// This only updates the local store
+	console.warn('Hourly rate update: Backend API does not support setting hourly rate');
+	hourlyRate.set(rate);
+	return true;
 }
 
 export async function syncTargetHoursFromAPI() {
@@ -71,9 +63,7 @@ export async function syncTargetHoursFromAPI() {
 
 export async function updateTargetHours(hours: number) {
 	try {
-		const response = await fetch(`/api/target-hours?hours=${hours}`, {
-			method: 'POST'
-		});
+		const response = await fetch(`/api/target-hours?hours=${hours}`);
 		if (response.ok) {
 			targetHours.set(hours);
 			return true;
