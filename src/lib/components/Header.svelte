@@ -4,17 +4,37 @@
         updateHourlyRate,
         updateTargetHours,
     } from "$lib/stores/settings";
-    import { Sun, Moon, Settings, Monitor } from "lucide-svelte";
+    import { viewMode, dateRange, loadWorkData } from "$lib/stores/workData"; // Import work stores
+    import {
+        Sun,
+        Moon,
+        Settings,
+        ChevronLeft,
+        ChevronRight,
+        RotateCw,
+        Calendar,
+    } from "lucide-svelte"; // Add icons
     import { Button } from "$lib/components/ui/button";
-    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+    import * as Sheet from "$lib/components/ui/sheet";
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
-    import * as Sheet from "$lib/components/ui/sheet";
+    import {
+        addWeeks,
+        subWeeks,
+        addMonths,
+        subMonths,
+        addYears,
+        subYears,
+        format,
+        startOfMonth,
+        endOfMonth,
+        startOfYear,
+        endOfYear,
+    } from "date-fns";
 
-    let theme = "dark"; // Default or from store if we had one
+    let theme = "dark";
 
     function toggleTheme() {
-        // Simplified theme toggle for now
         if (document.documentElement.classList.contains("dark")) {
             document.documentElement.classList.remove("dark");
             theme = "light";
@@ -26,8 +46,8 @@
 
     let tempHourlyRate = $state($settings.hourlyRate);
     let tempTargetHours = $state($settings.targetHours);
+    let isLoading = $state(false);
 
-    // Sync state with store updates
     $effect(() => {
         tempHourlyRate = $settings.hourlyRate;
         tempTargetHours = $settings.targetHours;
@@ -39,25 +59,134 @@
             updateTargetHours(Number(tempTargetHours)),
         ]);
     }
+
+    // Navigation Logic
+    function handlePrev() {
+        const { startDate, endDate } = $dateRange;
+        if ($viewMode === "week") {
+            $dateRange = {
+                startDate: subWeeks(startDate, 1),
+                endDate: subWeeks(endDate, 1),
+            };
+        } else if ($viewMode === "month") {
+            const prevMonth = subMonths(startDate, 1);
+            $dateRange = {
+                startDate: startOfMonth(prevMonth),
+                endDate: endOfMonth(prevMonth),
+            };
+        } else if ($viewMode === "year") {
+            const prevYear = subYears(startDate, 1);
+            $dateRange = {
+                startDate: startOfYear(prevYear),
+                endDate: endOfYear(prevYear),
+            };
+        }
+        loadWorkData();
+    }
+
+    function handleNext() {
+        const { startDate, endDate } = $dateRange;
+        if ($viewMode === "week") {
+            $dateRange = {
+                startDate: addWeeks(startDate, 1),
+                endDate: addWeeks(endDate, 1),
+            };
+        } else if ($viewMode === "month") {
+            const nextMonth = addMonths(startDate, 1);
+            $dateRange = {
+                startDate: startOfMonth(nextMonth),
+                endDate: endOfMonth(nextMonth),
+            };
+        } else if ($viewMode === "year") {
+            const nextYear = addYears(startDate, 1);
+            $dateRange = {
+                startDate: startOfYear(nextYear),
+                endDate: endOfYear(nextYear),
+            };
+        }
+        loadWorkData();
+    }
+
+    async function handleRefresh() {
+        isLoading = true;
+        await loadWorkData();
+        isLoading = false;
+    }
+
+    let formattedRange = $derived.by(() => {
+        if ($viewMode === "year") {
+            return format($dateRange.startDate, "yyyy");
+        }
+        if ($viewMode === "month") {
+            return format($dateRange.startDate, "MMMM yyyy");
+        }
+        return `${format($dateRange.startDate, "MMM d")} - ${format($dateRange.endDate, "MMM d, yyyy")}`;
+    });
 </script>
 
 <header
     class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/40 transition-all"
 >
     <div class="container flex h-14 items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div
-                class="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-inner"
-            >
-                <span class="font-black text-xs tracking-tighter">WR</span>
+        <div class="flex items-center gap-4">
+            <!-- Brand -->
+            <div class="flex items-center gap-3">
+                <div
+                    class="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-inner"
+                >
+                    <span class="font-black text-xs tracking-tighter">WR</span>
+                </div>
+                <span
+                    class="font-bold text-lg tracking-tight bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent hidden sm:inline-block"
+                    >WorkReport</span
+                >
             </div>
-            <span
-                class="font-bold text-lg tracking-tight bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent hidden sm:inline-block"
-                >WorkReport</span
+
+            <!-- Compact Date Navigator (Moved from Controls) -->
+            <div
+                class="hidden md:flex items-center gap-1 bg-background/50 rounded-lg p-0.5 border shadow-sm ml-2"
             >
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onclick={handlePrev}
+                    class="h-6 w-6"
+                >
+                    <ChevronLeft class="h-3.5 w-3.5" />
+                </Button>
+                <div
+                    class="flex items-center gap-2 px-2 min-w-[140px] justify-center font-medium font-mono text-xs"
+                >
+                    <Calendar class="h-3 w-3 text-muted-foreground" />
+                    <span>{formattedRange}</span>
+                </div>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onclick={handleNext}
+                    class="h-6 w-6"
+                >
+                    <ChevronRight class="h-3.5 w-3.5" />
+                </Button>
+            </div>
         </div>
 
         <div class="flex items-center gap-1">
+            <!-- Refresh Button (Moved from Controls) -->
+            <Button
+                variant="ghost"
+                size="icon"
+                onclick={handleRefresh}
+                disabled={isLoading}
+                class="rounded-lg text-muted-foreground hover:text-foreground"
+            >
+                <RotateCw
+                    class="h-[1.1rem] w-[1.1rem] {isLoading
+                        ? 'animate-spin'
+                        : ''}"
+                />
+            </Button>
+
             <!-- Theme Toggle -->
             <Button
                 variant="ghost"

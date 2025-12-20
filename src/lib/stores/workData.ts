@@ -130,16 +130,13 @@ export async function loadWorkData() {
         }
 
         // Fetch current and previous period data in parallel
-        const [currentWeek, previousWeek] = await Promise.all([
+        const [currentRaw, previousWeek] = await Promise.all([
             fetchWorkData(range.startDate, range.endDate),
             fetchWorkData(prevStart, prevEnd)
         ]);
 
-        // Fetch today's work if current week includes today
-        let todayWork = null;
-        if (isToday(range.startDate) || (range.startDate <= new Date() && range.endDate >= new Date())) {
-            todayWork = await fetchTodayWork();
-        }
+        // Merge today's data if applicable
+        const { data: currentWeek, todayWork } = await mergeTodayData(currentRaw, range.startDate, range.endDate);
 
         workDataState.set({
             currentWeek,

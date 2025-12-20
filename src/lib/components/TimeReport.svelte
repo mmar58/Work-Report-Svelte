@@ -50,7 +50,7 @@
 </script>
 
 <div
-    class="h-full flex flex-col justify-between modern-card rounded-xl p-5 relative overflow-hidden group"
+    class="h-full flex flex-col justify-between modern-card rounded-xl p-4 relative overflow-hidden group"
 >
     <!-- Ambient mesh gradient background -->
     <div
@@ -59,40 +59,40 @@
 
     <div>
         <h3
-            class="font-medium text-xs uppercase tracking-widest text-muted-foreground mb-1"
+            class="font-medium text-[10px] uppercase tracking-widest text-muted-foreground mb-1"
         >
             Current {modeLabel}
         </h3>
-        <div class="flex items-baseline gap-1 mt-1 z-10 relative">
-            <span class="text-5xl font-bold tracking-tighter text-foreground">
+        <div class="flex items-baseline gap-1 mt-0.5 z-10 relative">
+            <span class="text-4xl font-bold tracking-tighter text-foreground">
                 {currentHours}
             </span>
             <span
-                class="text-xl font-medium text-muted-foreground translate-y-[-4px]"
+                class="text-lg font-medium text-muted-foreground translate-y-[-3px]"
                 >h</span
             >
             <span
-                class="text-3xl font-bold tracking-tighter text-foreground ml-2"
+                class="text-2xl font-bold tracking-tighter text-foreground ml-1.5"
             >
                 {currentMinutes}
             </span>
             <span
-                class="text-lg font-medium text-muted-foreground translate-y-[-2px]"
+                class="text-sm font-medium text-muted-foreground translate-y-[-2px]"
                 >m</span
             >
         </div>
 
-        <div class="mt-4 flex flex-col gap-0.5 z-10 relative">
-            <span class="text-xs text-muted-foreground font-medium"
+        <div class="mt-3 flex flex-col gap-0 z-10 relative">
+            <span class="text-[10px] text-muted-foreground font-medium"
                 >Estimated Earnings</span
             >
             <span
-                class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600"
+                class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600 leading-tight"
             >
                 {formatMoney(currentEarnings)}
             </span>
             {#if $settings.dollarRate > 0}
-                <span class="text-[10px] text-muted-foreground/60 font-mono">
+                <span class="text-[9px] text-muted-foreground/60 font-mono">
                     ৳ {formatMoney(currentEarningsBDT, "BDT")}
                 </span>
             {/if}
@@ -100,29 +100,27 @@
     </div>
 
     <!-- Comparison Section -->
-    <div class="mt-6 pt-4 border-t border-border/40 space-y-3 z-10 relative">
+    <div class="mt-4 pt-3 border-t border-border/40 space-y-2 z-10 relative">
         <div
-            class="flex items-center justify-between text-xs text-muted-foreground"
+            class="flex items-center justify-between text-[11px] text-muted-foreground"
         >
             <span>{prevLabel}</span>
             <span class="font-mono">{prevHours}h {prevMinutes}m</span>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5">
             <div
-                class="flex items-center gap-1.5 {isPositive
+                class="flex items-center gap-1 {isPositive
                     ? 'text-green-500'
-                    : 'text-red-500'} bg-card/60 px-2 py-1 rounded-full shadow-sm border border-border/50"
+                    : 'text-red-500'} bg-card/60 px-1.5 py-0.5 rounded-full shadow-sm border border-border/50"
             >
                 {#if isPositive}
-                    <ArrowUp size={12} strokeWidth={3} />
+                    <ArrowUp size={10} strokeWidth={3} />
                 {:else}
-                    <ArrowDown size={12} strokeWidth={3} />
+                    <ArrowDown size={10} strokeWidth={3} />
                 {/if}
-                <span class="text-xs font-bold">{diffStr}</span>
+                <span class="text-[10px] font-bold">{diffStr}</span>
             </div>
-            <span class="text-[10px] text-muted-foreground/50"
-                >vs previous period</span
-            >
+            <span class="text-[9px] text-muted-foreground/50">vs previous</span>
         </div>
     </div>
 </div>
