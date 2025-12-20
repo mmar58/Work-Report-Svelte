@@ -4,7 +4,12 @@
         updateHourlyRate,
         updateTargetHours,
     } from "$lib/stores/settings";
-    import { viewMode, dateRange, loadWorkData } from "$lib/stores/workData"; // Import work stores
+    import {
+        viewMode,
+        dateRange,
+        loadWorkData,
+        currentWeekData,
+    } from "$lib/stores/workData"; // Import work stores
     import {
         Sun,
         Moon,
@@ -13,11 +18,19 @@
         ChevronRight,
         RotateCw,
         Calendar,
+        Target,
+        Zap,
+        CalendarDays,
     } from "lucide-svelte"; // Add icons
     import { Button } from "$lib/components/ui/button";
     import * as Sheet from "$lib/components/ui/sheet";
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
+    import { Progress } from "$lib/components/ui/progress";
+    import {
+        calculateRemainingDays,
+        calculateRequiredDaily,
+    } from "$lib/utils/calculations";
     import {
         addWeeks,
         subWeeks,
@@ -59,6 +72,22 @@
             updateTargetHours(Number(tempTargetHours)),
         ]);
     }
+
+    // Goal Logic
+    let weeklyHours = $derived(
+        Number($currentWeekData.totalHours) +
+            Number($currentWeekData.totalMinutes) / 60,
+    );
+    let targetHours = $derived($settings.targetHours);
+    let percentage = $derived(Math.min(100, (weeklyHours / targetHours) * 100));
+
+    let remainingDays = $derived(calculateRemainingDays());
+    let currentTotalMinutes = $derived(
+        $currentWeekData.totalHours * 60 + $currentWeekData.totalMinutes,
+    );
+    let requiredDaily = $derived(
+        calculateRequiredDaily(currentTotalMinutes, targetHours, remainingDays),
+    );
 
     // Navigation Logic
     function handlePrev() {
@@ -128,7 +157,7 @@
     class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/40 transition-all"
 >
     <div class="container flex h-14 items-center justify-between">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 min-w-[300px]">
             <!-- Brand -->
             <div class="flex items-center gap-3">
                 <div
@@ -142,7 +171,7 @@
                 >
             </div>
 
-            <!-- Compact Date Navigator (Moved from Controls) -->
+            <!-- Compact Date Navigator -->
             <div
                 class="hidden md:flex items-center gap-1 bg-background/50 rounded-lg p-0.5 border shadow-sm ml-2"
             >
@@ -171,8 +200,36 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-1">
-            <!-- Refresh Button (Moved from Controls) -->
+        <!-- CENTER: Weekly Goal Widget -->
+        <div
+            class="hidden lg:flex flex-col items-center justify-center gap-1 w-[320px]"
+        >
+            <div
+                class="flex items-center justify-between w-full text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-1"
+            >
+                <span class="flex items-center gap-1"
+                    ><Target class="h-3 w-3" /> Weekly Goal</span
+                >
+                <span>{percentage.toFixed(0)}%</span>
+            </div>
+            <Progress value={percentage} class="h-1.5 w-full bg-secondary" />
+            <div
+                class="flex items-center justify-between w-full text-[10px] font-mono text-muted-foreground px-1 opacity-80"
+            >
+                <span class="flex items-center gap-1"
+                    ><CalendarDays class="h-2.5 w-2.5" />
+                    {remainingDays}d Left</span
+                >
+                <span>{weeklyHours.toFixed(1)} / {targetHours}h</span>
+                <span class="flex items-center gap-1"
+                    ><Zap class="h-2.5 w-2.5 text-amber-500" /> Target {requiredDaily.hours}h
+                    {requiredDaily.minutes}m</span
+                >
+            </div>
+        </div>
+
+        <div class="flex items-center gap-1 justify-end min-w-[300px]">
+            <!-- Refresh Button -->
             <Button
                 variant="ghost"
                 size="icon"

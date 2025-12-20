@@ -3,7 +3,6 @@
 
     import TimeReport from "$lib/components/TimeReport.svelte";
     import FloatingReport from "$lib/components/FloatingReport.svelte";
-    import WorkGoalTracker from "$lib/components/WorkGoalTracker.svelte";
     import ReportChart from "$lib/components/ReportChart.svelte";
     import DailyLogs from "$lib/components/DailyLogs.svelte";
     import * as Resizable from "$lib/components/ui/resizable";
@@ -66,10 +65,7 @@
                     <div
                         class="h-full flex flex-col p-3 gap-3 overflow-y-auto border-l border-border/30"
                     >
-                        <div class="flex-none">
-                            <WorkGoalTracker />
-                        </div>
-                        <div class="flex-1 pt-2 overflow-hidden">
+                        <div class="flex-1 pt-2 overflow-hidden h-full">
                             <DailyLogs />
                         </div>
                     </div>
@@ -81,8 +77,8 @@
         <div class="lg:hidden flex flex-col gap-6">
             <TimeReport />
             <ReportChart />
-            <WorkGoalTracker />
             <FloatingReport />
+            <DailyLogs />
         </div>
     </main>
 </div>
