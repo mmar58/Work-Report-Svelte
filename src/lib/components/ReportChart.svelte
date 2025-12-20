@@ -81,9 +81,18 @@
 
     // Use an effect to handle chart creation/updates when canvas and data are ready
     $effect(() => {
-        if (!canvas) return;
+        if (!canvas) {
+            console.log("ReportChart: waiting for canvas...");
+            return;
+        }
 
-        // Destroy existing instance if it exists to prevent memory leaks/duplicates
+        console.log("ReportChart: Canvas ready", {
+            width: canvas.width,
+            height: canvas.height,
+            data: chartData,
+        });
+
+        // Destroy existing instance if it exists
         if (chartInstance) {
             chartInstance.destroy();
             chartInstance = null;
@@ -91,60 +100,74 @@
 
         const ctx = canvas.getContext("2d");
         if (ctx && chartData) {
-            chartInstance = new Chart(ctx, {
-                type: "bar",
-                data: chartData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: "index",
-                        intersect: false,
-                    },
-                    plugins: {
-                        legend: {
-                            position: "top",
-                            labels: {
-                                usePointStyle: true,
+            console.log("ReportChart: Creating new chart instance");
+            // Check if data is empty (all zeros) for logging purposes
+            const totalVal = chartData.datasets.reduce(
+                (acc, ds) => acc + ds.data.reduce((a, b) => a + Number(b), 0),
+                0,
+            );
+            console.log("ReportChart: Total Value:", totalVal);
+
+            try {
+                chartInstance = new Chart(ctx, {
+                    type: "bar",
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: "index",
+                            intersect: false,
+                        },
+                        plugins: {
+                            legend: {
+                                position: "top",
+                                labels: {
+                                    usePointStyle: true,
+                                },
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        let label = context.dataset.label || "";
+                                        if (label) {
+                                            label += ": ";
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            const hours = Math.floor(
+                                                context.parsed.y,
+                                            );
+                                            const minutes = Math.round(
+                                                (context.parsed.y - hours) * 60,
+                                            );
+                                            label += `${hours}h ${minutes}m`;
+                                        }
+                                        return label;
+                                    },
+                                },
                             },
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => {
-                                    let label = context.dataset.label || "";
-                                    if (label) {
-                                        label += ": ";
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        const hours = Math.floor(
-                                            context.parsed.y,
-                                        );
-                                        const minutes = Math.round(
-                                            (context.parsed.y - hours) * 60,
-                                        );
-                                        label += `${hours}h ${minutes}m`;
-                                    }
-                                    return label;
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: "Hours",
+                                },
+                            },
+                            x: {
+                                grid: {
+                                    display: false,
                                 },
                             },
                         },
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: "Hours",
-                            },
-                        },
-                        x: {
-                            grid: {
-                                display: false,
-                            },
-                        },
-                    },
-                },
-            });
+                });
+            } catch (error) {
+                console.error("ReportChart: Error creating chart", error);
+            }
+        } else {
+            console.warn("ReportChart: Context failed");
         }
 
         return () => {
@@ -162,6 +185,12 @@
             chartInstance.destroy();
         }
     });
+
+    // Derived state for visibility
+    let hasData = $derived(
+        $currentWeekData.entries.length > 0 ||
+            $previousWeekData.entries.length > 0,
+    );
 </script>
 
 <Card class="h-full shadow-md border-none">
@@ -169,34 +198,36 @@
         <CardTitle class="text-lg">Work Activity</CardTitle>
     </CardHeader>
     <CardContent class="h-[300px] relative">
-        {#if $currentWeekData.entries.length > 0 || $previousWeekData.entries.length > 0}
-            <canvas bind:this={canvas}></canvas>
-        {:else}
-            <div
-                class="h-full flex items-center justify-center text-muted-foreground flex-col gap-2"
-            >
-                <div class="p-4 rounded-full bg-secondary/50">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="lucide lucide-bar-chart-2 opacity-50"
-                        ><line x1="18" x2="18" y1="20" y2="10" /><line
-                            x1="12"
-                            x2="12"
-                            y1="20"
-                            y2="4"
-                        /><line x1="6" x2="6" y1="20" y2="14" /></svg
-                    >
-                </div>
-                <span>No activity data to display</span>
+        <div class="w-full h-full {hasData ? 'block' : 'hidden'}">
+            <canvas bind:this={canvas} class="w-full h-full"></canvas>
+        </div>
+
+        <div
+            class="w-full h-full flex items-center justify-center text-muted-foreground flex-col gap-2 {hasData
+                ? 'hidden'
+                : 'flex'}"
+        >
+            <div class="p-4 rounded-full bg-secondary/50">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-bar-chart-2 opacity-50"
+                    ><line x1="18" x2="18" y1="20" y2="10" /><line
+                        x1="12"
+                        x2="12"
+                        y1="20"
+                        y2="4"
+                    /><line x1="6" x2="6" y1="20" y2="14" /></svg
+                >
             </div>
-        {/if}
+            <span>No activity data to display</span>
+        </div>
     </CardContent>
 </Card>
