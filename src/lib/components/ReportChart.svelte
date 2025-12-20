@@ -122,6 +122,37 @@
                 if (index >= 0 && index < 7)
                     prevValues[index] += e.duration / 60;
             });
+        } else if (mode === "month") {
+            // Group by Week (1-5)
+            $currentWeekData.entries.forEach((e) => {
+                const date = new Date(e.date);
+                const dayOfMonth = date.getDate();
+                // Simple bucket: 0-6 -> W1, 7-13 -> W2, etc.
+                const index = Math.floor((dayOfMonth - 1) / 7);
+                if (index >= 0 && index < labels.length)
+                    currentValues[index] += e.duration / 60;
+            });
+
+            $previousWeekData.entries.forEach((e) => {
+                const date = new Date(e.date);
+                const dayOfMonth = date.getDate();
+                const index = Math.floor((dayOfMonth - 1) / 7);
+                if (index >= 0 && index < labels.length)
+                    prevValues[index] += e.duration / 60;
+            });
+        } else if (mode === "year") {
+            // Group by Month (Jan-Dec)
+            $currentWeekData.entries.forEach((e) => {
+                const month = new Date(e.date).getMonth();
+                if (month >= 0 && month < 12)
+                    currentValues[month] += e.duration / 60;
+            });
+
+            $previousWeekData.entries.forEach((e) => {
+                const month = new Date(e.date).getMonth();
+                if (month >= 0 && month < 12)
+                    prevValues[month] += e.duration / 60;
+            });
         }
         // TODO: Add logic for Month/Year aggregation if backend supports it or do it client side
         // For this task scope (UI Compact), we focus on the UI switch mostly.
