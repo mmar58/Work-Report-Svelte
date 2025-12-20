@@ -68,7 +68,7 @@
         class="w-full h-full shadow-lg border-primary/10 bg-card/50 backdrop-blur-sm flex flex-col"
     >
         <div
-            class="p-4 border-b border-border/30 flex items-center justify-between"
+            class="px-4 py-0 border-b border-border/30 flex items-center justify-between"
         >
             <Input
                 value={`Dollar R - ${$settings.dollarRate}`}
