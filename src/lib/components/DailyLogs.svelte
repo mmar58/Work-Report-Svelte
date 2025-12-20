@@ -10,7 +10,6 @@
         isSameWeek,
         isSameMonth,
     } from "date-fns";
-    import { ScrollArea } from "$lib/components/ui/scroll-area";
     import {
         Accordion,
         AccordionContent,

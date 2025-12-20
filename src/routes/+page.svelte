@@ -15,6 +15,7 @@
     } from "$lib/stores/settings";
     import { onMount } from "svelte";
 
+    // Force HMR refresh
     onMount(async () => {
         // Initial data load
         await Promise.all([

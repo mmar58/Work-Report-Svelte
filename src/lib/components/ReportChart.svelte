@@ -111,7 +111,48 @@
             try {
                 chartInstance = new Chart(ctx, {
                     type: "bar",
-                    data: chartData,
+                    data: {
+                        labels: chartData.labels,
+                        datasets: chartData.datasets.map((ds, i) => {
+                            // Create gradient
+                            const gradient = ctx.createLinearGradient(
+                                0,
+                                0,
+                                0,
+                                400,
+                            );
+                            if (i === 0) {
+                                // Current
+                                gradient.addColorStop(
+                                    0,
+                                    "rgba(99, 102, 241, 0.9)",
+                                ); // Indigo-500
+                                gradient.addColorStop(
+                                    1,
+                                    "rgba(99, 102, 241, 0.4)",
+                                );
+                            } else {
+                                // Previous
+                                gradient.addColorStop(
+                                    0,
+                                    "rgba(148, 163, 184, 0.5)",
+                                ); // Slate-400
+                                gradient.addColorStop(
+                                    1,
+                                    "rgba(148, 163, 184, 0.1)",
+                                );
+                            }
+
+                            return {
+                                ...ds,
+                                backgroundColor: gradient,
+                                borderRadius: 6,
+                                borderSkipped: false,
+                                barThickness: mode === "week" ? 32 : "flex",
+                                maxBarThickness: 40,
+                            };
+                        }),
+                    },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
@@ -122,11 +163,26 @@
                         plugins: {
                             legend: {
                                 position: "top",
+                                align: "end",
                                 labels: {
                                     usePointStyle: true,
+                                    pointStyle: "circle",
+                                    boxWidth: 8,
+                                    padding: 20,
+                                    font: { family: "Inter", size: 11 },
                                 },
                             },
                             tooltip: {
+                                backgroundColor: "rgba(15, 23, 42, 0.9)",
+                                titleFont: {
+                                    family: "Inter",
+                                    size: 13,
+                                    weight: "600",
+                                },
+                                bodyFont: { family: "Inter", size: 12 },
+                                padding: 10,
+                                cornerRadius: 8,
+                                displayColors: false,
                                 callbacks: {
                                     label: (context) => {
                                         let label = context.dataset.label || "";
@@ -150,14 +206,26 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: "Hours",
+                                border: { display: false },
+                                grid: {
+                                    color: "rgba(148, 163, 184, 0.1)",
+                                },
+                                ticks: {
+                                    font: { family: "Inter", size: 10 },
+                                    color: "rgba(148, 163, 184, 0.8)",
+                                    callback: (val) => val + "h",
                                 },
                             },
                             x: {
-                                grid: {
-                                    display: false,
+                                border: { display: false },
+                                grid: { display: false },
+                                ticks: {
+                                    font: {
+                                        family: "Inter",
+                                        size: 11,
+                                        weight: "500",
+                                    },
+                                    color: "rgba(148, 163, 184, 0.8)",
                                 },
                             },
                         },

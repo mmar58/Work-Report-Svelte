@@ -49,100 +49,80 @@
     );
 </script>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
-    <!-- Current Period -->
-    <Card
-        class="relative overflow-hidden border-none shadow-md bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20"
-    >
-        <CardContent class="p-6 flex flex-col justify-between h-full">
-            <div class="space-y-1">
-                <span
-                    class="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2"
-                >
-                    <Clock class="h-3 w-3" /> Current {modeLabel}
+<div
+    class="h-full flex flex-col justify-between modern-card rounded-xl p-5 relative overflow-hidden group"
+>
+    <!-- Ambient mesh gradient background -->
+    <div
+        class="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-500"
+    ></div>
+
+    <div>
+        <h3
+            class="font-medium text-xs uppercase tracking-widest text-muted-foreground mb-1"
+        >
+            Current {modeLabel}
+        </h3>
+        <div class="flex items-baseline gap-1 mt-1 z-10 relative">
+            <span class="text-5xl font-bold tracking-tighter text-foreground">
+                {currentHours}
+            </span>
+            <span
+                class="text-xl font-medium text-muted-foreground translate-y-[-4px]"
+                >h</span
+            >
+            <span
+                class="text-3xl font-bold tracking-tighter text-foreground ml-2"
+            >
+                {currentMinutes}
+            </span>
+            <span
+                class="text-lg font-medium text-muted-foreground translate-y-[-2px]"
+                >m</span
+            >
+        </div>
+
+        <div class="mt-4 flex flex-col gap-0.5 z-10 relative">
+            <span class="text-xs text-muted-foreground font-medium"
+                >Estimated Earnings</span
+            >
+            <span
+                class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600"
+            >
+                {formatMoney(currentEarnings)}
+            </span>
+            {#if $settings.dollarRate > 0}
+                <span class="text-[10px] text-muted-foreground/60 font-mono">
+                    ৳ {formatMoney(currentEarningsBDT, "BDT")}
                 </span>
-                <div
-                    class="text-5xl font-bold tracking-tighter tabular-nums text-primary mt-2"
-                >
-                    {currentHours}<span
-                        class="text-2xl text-muted-foreground font-normal"
-                        >h</span
-                    >
-                    {currentMinutes}<span
-                        class="text-2xl text-muted-foreground font-normal"
-                        >m</span
-                    >
-                </div>
-            </div>
+            {/if}
+        </div>
+    </div>
 
-            <div class="mt-4 pt-4 border-t border-primary/10">
-                <div class="flex justify-between items-end">
-                    <div>
-                        <p class="text-sm text-muted-foreground mb-1">
-                            Estimated Earnings
-                        </p>
-                        <div
-                            class="text-xl font-bold text-foreground flex items-center gap-1"
-                        >
-                            <DollarSign class="h-4 w-4 text-green-500" />
-                            {formatMoney(currentEarnings)}
-                        </div>
-                        {#if $settings.dollarRate > 0}
-                            <p class="text-xs text-muted-foreground mt-1">
-                                ৳ {formatMoney(currentEarningsBDT, "BDT")}
-                            </p>
-                        {/if}
-                    </div>
-                </div>
+    <!-- Comparison Section -->
+    <div class="mt-6 pt-4 border-t border-border/40 space-y-3 z-10 relative">
+        <div
+            class="flex items-center justify-between text-xs text-muted-foreground"
+        >
+            <span>{prevLabel}</span>
+            <span class="font-mono">{prevHours}h {prevMinutes}m</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <div
+                class="flex items-center gap-1.5 {isPositive
+                    ? 'text-green-500'
+                    : 'text-red-500'} bg-card/60 px-2 py-1 rounded-full shadow-sm border border-border/50"
+            >
+                {#if isPositive}
+                    <ArrowUp size={12} strokeWidth={3} />
+                {:else}
+                    <ArrowDown size={12} strokeWidth={3} />
+                {/if}
+                <span class="text-xs font-bold">{diffStr}</span>
             </div>
-        </CardContent>
-    </Card>
-
-    <!-- Previous Period Comparison -->
-    <Card class="bg-card/50">
-        <CardContent class="p-6 flex flex-col justify-center h-full gap-4">
-            <div class="space-y-1">
-                <span
-                    class="text-xs font-medium text-muted-foreground uppercase tracking-wider"
-                    >{prevLabel}</span
-                >
-                <div
-                    class="text-2xl font-semibold tabular-nums text-muted-foreground"
-                >
-                    {prevHours}h {prevMinutes}m
-                </div>
-                <div class="text-sm text-muted-foreground">
-                    Earnings: {formatMoney(prevEarnings)}
-                </div>
-            </div>
-
-            <Separator />
-
-            <div class="flex items-center gap-3">
-                <div
-                    class="h-10 w-10 rounded-full flex items-center justify-center {isPositive
-                        ? 'bg-green-500/10 text-green-500'
-                        : 'bg-red-500/10 text-red-500'}"
-                >
-                    {#if isPositive}
-                        <ArrowUp class="h-5 w-5" />
-                    {:else}
-                        <ArrowDown class="h-5 w-5" />
-                    {/if}
-                </div>
-                <div>
-                    <div
-                        class="font-medium {isPositive
-                            ? 'text-green-500'
-                            : 'text-red-500'}"
-                    >
-                        {isPositive ? "+" : "-"}{diffStr}
-                    </div>
-                    <div class="text-xs text-muted-foreground">
-                        vs previous {modeLabel.toLowerCase()}
-                    </div>
-                </div>
-            </div>
-        </CardContent>
-    </Card>
+            <span class="text-[10px] text-muted-foreground/50"
+                >vs previous period</span
+            >
+        </div>
+    </div>
 </div>

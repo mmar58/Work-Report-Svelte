@@ -43,53 +43,57 @@
     );
 </script>
 
-<Card class="w-full shadow-sm border-none bg-secondary/5">
-    <CardHeader class="pb-2">
-        <CardTitle
-            class="text-sm font-medium text-muted-foreground flex items-center gap-2"
-        >
-            <Target class="h-4 w-4" /> Weekly Goal
-        </CardTitle>
-    </CardHeader>
-    <CardContent class="space-y-4">
-        <div class="flex justify-between items-end">
-            <div class="text-2xl font-bold">
-                {Math.floor(percentage)}%
+<div class="h-full flex flex-col modern-card rounded-xl p-5 gap-4">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <div class="p-1.5 rounded-full bg-primary/10 text-primary">
+                <Target size={14} />
             </div>
-            <div class="text-sm text-muted-foreground">
-                {weeklyHours.toFixed(1)} / {targetHours} hrs
-            </div>
-        </div>
-
-        <Progress value={percentage} max={100} class="h-2" />
-
-        {#if !isGoalMet && remainingDays > 0}
-            <div class="grid grid-cols-2 gap-2 pt-2">
-                <div
-                    class="bg-card rounded-lg p-2.5 flex flex-col items-center justify-center text-center shadow-sm"
-                >
-                    <CalendarDays class="h-4 w-4 text-muted-foreground mb-1" />
-                    <span class="text-xs text-muted-foreground">Days Left</span>
-                    <span class="font-bold">{remainingDays}</span>
-                </div>
-                <div
-                    class="bg-card rounded-lg p-2.5 flex flex-col items-center justify-center text-center shadow-sm"
-                >
-                    <Zap class="h-4 w-4 text-yellow-500 mb-1" />
-                    <span class="text-xs text-muted-foreground"
-                        >Daily Target</span
-                    >
-                    <span class="font-bold text-primary"
-                        >{requiredDaily.hours}h {requiredDaily.minutes}m</span
-                    >
-                </div>
-            </div>
-        {:else if isGoalMet}
-            <div
-                class="bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg p-3 text-center text-sm font-medium"
+            <span
+                class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                >Weekly Goal</span
             >
-                🎉 Weekly goal achieved!
-            </div>
-        {/if}
-    </CardContent>
-</Card>
+        </div>
+        <span class="text-xs font-mono text-muted-foreground"
+            >{targetHours}h Target</span
+        >
+    </div>
+
+    <!-- Minimal Progress Ring/Bar -->
+    <div class="space-y-2">
+        <div class="flex items-end justify-between">
+            <span class="text-4xl font-bold tracking-tighter"
+                >{percentage.toFixed(0)}%</span
+            >
+            <span class="text-xs font-medium text-muted-foreground mb-1.5">
+                {weeklyHours.toFixed(1)} / {targetHours} hrs
+            </span>
+        </div>
+        <Progress value={percentage} class="h-2" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mt-auto">
+        <div
+            class="p-3 rounded-lg bg-secondary/30 border border-border/50 flex flex-col gap-1 items-center justify-center text-center"
+        >
+            <CalendarDays size={16} class="text-muted-foreground mb-1" />
+            <span
+                class="text-[10px] text-muted-foreground uppercase tracking-wide"
+                >Days Left</span
+            >
+            <span class="text-lg font-bold">{remainingDays}</span>
+        </div>
+        <div
+            class="p-3 rounded-lg bg-secondary/30 border border-border/50 flex flex-col gap-1 items-center justify-center text-center"
+        >
+            <Zap size={16} class="text-amber-500 mb-1" />
+            <span
+                class="text-[10px] text-muted-foreground uppercase tracking-wide"
+                >Daily Target</span
+            >
+            <span class="text-lg font-bold"
+                >{requiredDaily.hours}h {requiredDaily.minutes}m</span
+            >
+        </div>
+    </div>
+</div>

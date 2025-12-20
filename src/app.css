@@ -146,6 +146,24 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased tracking-tight;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02"; /* Modern font features */
+  }
+  
+  /* Global "Modern Card" style we can apply to containers */
+  .modern-card {
+    @apply bg-card/60 backdrop-blur-md border border-border/50 shadow-sm transition-all duration-300 hover:shadow-md;
+  }
+  
+  /* Compact Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50 transition-colors;
   }
 }
