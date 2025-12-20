@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { format, startOfWeek, endOfWeek, subWeeks, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, subYears, isToday } from 'date-fns';
-import type { WorkData, WorkDataState, DateRange, WorkEntry } from '$lib/types';
+import type { WorkData, WorkDataState, DateRange, WorkEntry, WorkTimeResponse } from '$lib/types';
 
 // View mode for determining comparison context
 export const viewMode = writable<'week' | 'month' | 'year'>('week');
@@ -66,7 +66,18 @@ export async function fetchWorkData(start: Date, end: Date): Promise<WorkData> {
         }
 
         const data = await response.json();
-        return calculateTotals(data.workData || []);
+
+        // Map raw backend data to internal WorkEntry format
+        const mappedEntries: WorkEntry[] = (data.workData || []).map((item: any) => ({
+            date: item.date,
+            startTime: item.startTime || '',
+            endTime: item.endTime || '',
+            description: item.description || '',
+            // Calculate total duration in minutes from backend fields
+            duration: (Number(item.hours || 0) * 60) + Number(item.minutes || 0) + Number(item.extraminutes || 0)
+        }));
+
+        return calculateTotals(mappedEntries);
     } catch (error) {
         console.error('Error fetching work data:', error);
         throw error;
