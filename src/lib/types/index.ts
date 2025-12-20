@@ -6,6 +6,13 @@ export interface WorkEntry {
     endTime: string; // HH:mm format
     duration: number; // minutes
     description?: string;
+    detailedWork?: WorkSession[]; // Parsed from JSON string
+}
+
+export interface WorkSession {
+    startTime: string;
+    endTime: string;
+    duration: string;
 }
 
 export interface WorkData {

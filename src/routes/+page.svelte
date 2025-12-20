@@ -5,6 +5,7 @@
     import FloatingReport from "$lib/components/FloatingReport.svelte";
     import WorkGoalTracker from "$lib/components/WorkGoalTracker.svelte";
     import ReportChart from "$lib/components/ReportChart.svelte";
+    import DailyLogs from "$lib/components/DailyLogs.svelte";
     import * as Resizable from "$lib/components/ui/resizable";
     import { loadWorkData, dateRange } from "$lib/stores/workData";
     import {
@@ -65,18 +66,8 @@
                         <div class="flex-none">
                             <WorkGoalTracker />
                         </div>
-                        <div class="flex-1 border-t pt-4">
-                            <!-- Future: Daily logs list placeholder -->
-                            <h3 class="font-medium text-muted-foreground mb-4">
-                                Daily Logs
-                            </h3>
-                            <div
-                                class="space-y-2 text-sm text-muted-foreground"
-                            >
-                                <p class="italic opacity-50">
-                                    Detailed logs coming soon...
-                                </p>
-                            </div>
+                        <div class="flex-1 border-t pt-4 overflow-hidden">
+                            <DailyLogs />
                         </div>
                     </div>
                 </Resizable.Pane>

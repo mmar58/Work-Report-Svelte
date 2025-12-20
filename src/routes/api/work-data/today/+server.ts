@@ -14,7 +14,8 @@ export const GET: RequestHandler = async ({ fetch }) => {
             return json({
                 hours: today.hours,
                 minutes: today.minutes,
-                totalMinutes: (today.hours * 60) + today.minutes
+                totalMinutes: (today.hours * 60) + today.minutes,
+                detailedWork: today.detailedWork // Pass raw JSON string or parsed object
             });
         }
         return json({ hours: 0, minutes: 0, totalMinutes: 0 });

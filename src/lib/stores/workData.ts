@@ -74,7 +74,9 @@ export async function fetchWorkData(start: Date, end: Date): Promise<WorkData> {
             endTime: item.endTime || '',
             description: item.description || '',
             // Calculate total duration in minutes from backend fields
-            duration: (Number(item.hours || 0) * 60) + Number(item.minutes || 0) + Number(item.extraminutes || 0)
+            duration: (Number(item.hours || 0) * 60) + Number(item.minutes || 0) + Number(item.extraminutes || 0),
+            // Parse detailedWork if available
+            detailedWork: item.detailedWork ? JSON.parse(item.detailedWork) : []
         }));
 
         return calculateTotals(mappedEntries);
@@ -189,10 +191,11 @@ async function mergeTodayData(currentData: WorkData, rangeStart: Date, rangeEnd:
 
         const newEntry: WorkEntry = {
             date: todayStr,
-            startTime: '', // Backend doesn't reliably give this in the summary view, ignoring for now
+            startTime: '',
             endTime: '',
             duration: todayWidgetData.totalMinutes,
-            description: 'Today'
+            description: 'Today',
+            detailedWork: todayWorkResponse.detailedWork ? JSON.parse(todayWorkResponse.detailedWork) : []
         };
 
         if (existingIndex >= 0) {
