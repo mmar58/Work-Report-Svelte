@@ -44,12 +44,17 @@
 
     // Grouper function
     function groupEntries(entries: any[], mode: "week" | "month" | "year") {
-        if (mode === "week") return { type: "flat", data: entries };
+        // Sort inputs descending first
+        const sortedEntries = [...entries].sort((a, b) =>
+            b.date.localeCompare(a.date),
+        );
+
+        if (mode === "week") return { type: "flat", data: sortedEntries };
 
         if (mode === "month") {
             // Group by Week
             const groups: Record<string, any[]> = {};
-            entries.forEach((e) => {
+            sortedEntries.forEach((e) => {
                 const date = parseISO(e.date);
                 const weekStart = startOfWeek(date, { weekStartsOn: 1 }); // Monday
                 const key = format(weekStart, "yyyy-MM-dd");
@@ -61,7 +66,7 @@
                 labelFormat: (key: string) =>
                     `Week of ${format(parseISO(key), "MMM d, yyyy")}`,
                 data: Object.entries(groups).sort((a, b) =>
-                    a[0].localeCompare(b[0]),
+                    b[0].localeCompare(a[0]),
                 ),
             };
         }
@@ -69,7 +74,7 @@
         if (mode === "year") {
             // Group by Month
             const groups: Record<string, any[]> = {};
-            entries.forEach((e) => {
+            sortedEntries.forEach((e) => {
                 const date = parseISO(e.date);
                 const monthStart = startOfMonth(date);
                 const key = format(monthStart, "yyyy-MM-dd");
@@ -81,12 +86,12 @@
                 labelFormat: (key: string) =>
                     format(parseISO(key), "MMMM yyyy"),
                 data: Object.entries(groups).sort((a, b) =>
-                    a[0].localeCompare(b[0]),
+                    b[0].localeCompare(a[0]),
                 ),
             };
         }
 
-        return { type: "flat", data: entries };
+        return { type: "flat", data: sortedEntries };
     }
 
     let groupedData = $derived(groupEntries(entries, mode));
