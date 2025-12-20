@@ -1,13 +1,12 @@
 <script lang="ts">
-	import "./layout.css";
-	import { onMount } from "svelte";
-	import { browser } from "$app/environment";
+	import "../app.css";
+	import { Toaster } from "$lib/components/ui/sonner";
 
 	let { children } = $props();
 </script>
 
 <div
-	class="min-h-screen bg-background text-foreground transition-colors duration-300 antialiased selection:bg-primary/20 selection:text-primary relative overflow-hidden"
+	class="min-h-screen bg-background text-foreground transition-colors duration-300 antialiased selection:bg-primary/20 selection:text-primary relative overflow-hidden font-sans"
 >
 	<!-- Ambient Background Gradients -->
 	<div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
@@ -20,4 +19,5 @@
 	</div>
 
 	{@render children()}
+	<Toaster />
 </div>
