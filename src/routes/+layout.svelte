@@ -17,6 +17,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Work Report</title>
+</svelte:head>
+
 <div
 	class="min-h-screen bg-background text-foreground transition-colors duration-300 antialiased selection:bg-primary/20 selection:text-primary relative overflow-hidden font-sans"
 >
