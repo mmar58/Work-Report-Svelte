@@ -24,6 +24,9 @@
     } from "lucide-svelte"; // Add icons
     import { Button } from "$lib/components/ui/button";
     import * as Sheet from "$lib/components/ui/sheet";
+    import * as Dialog from "$lib/components/ui/dialog";
+    import ExtraTimeDialog from "$lib/components/ExtraTimeDialog.svelte";
+
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
     import { Progress } from "$lib/components/ui/progress";
@@ -46,6 +49,8 @@
     } from "date-fns";
 
     let theme = "dark";
+
+    let showExtraTimeDialog = $state(false);
 
     function toggleTheme() {
         if (document.documentElement.classList.contains("dark")) {
@@ -172,7 +177,19 @@
             </div>
 
             <!-- Compact Date Navigator -->
+            <Button
+                variant="outline"
+                size="sm"
+                class="ml-2 h-7 text-xs gap-1 hidden md:flex"
+                onclick={() => (showExtraTimeDialog = true)}
+            >
+                <CalendarDays class="h-3 w-3" />
+                <span>Add Extra</span>
+            </Button>
 
+            <Dialog.Root bind:open={showExtraTimeDialog}>
+                <ExtraTimeDialog bind:open={showExtraTimeDialog} />
+            </Dialog.Root>
         </div>
 
         <!-- CENTER: Weekly Goal Widget -->

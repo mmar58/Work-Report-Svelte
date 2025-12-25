@@ -124,11 +124,20 @@
                             <h4 class="font-medium text-sm">
                                 {format(parseISO(entry.date), "EEE, MMM d")}
                             </h4>
-                            <span
-                                class="text-xs font-mono font-medium text-primary"
-                            >
-                                {formatDuration(entry.duration)}
-                            </span>
+                            <div class="flex flex-col items-end">
+                                <span
+                                    class="text-xs font-mono font-medium text-primary"
+                                >
+                                    {formatDuration(entry.duration)}
+                                </span>
+                                {#if entry.extraminutes > 0}
+                                    <span
+                                        class="text-[10px] text-muted-foreground font-mono"
+                                    >
+                                        (+{formatDuration(entry.extraminutes)} extra)
+                                    </span>
+                                {/if}
+                            </div>
                         </div>
 
                         <!-- Detailed Sessions -->
