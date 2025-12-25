@@ -10,6 +10,7 @@
         dateRange,
         loadWorkData,
         currentWeekData,
+        workDataState, // Import full state
     } from "$lib/stores/workData"; // Import work stores
     import {
         Sun,
@@ -88,9 +89,49 @@
     let currentTotalMinutes = $derived(
         $currentWeekData.totalHours * 60 + $currentWeekData.totalMinutes,
     );
-    let requiredDaily = $derived(
-        calculateRequiredDaily(currentTotalMinutes, targetHours, remainingDays),
+
+    // Calculate Today's context
+    let todayWorkMinutes = $derived(
+        $workDataState.todayWork
+            ? Number($workDataState.todayWork.hours || 0) * 60 +
+                  Number($workDataState.todayWork.minutes || 0)
+            : 0,
     );
+
+    // Calculate minutes done BEFORE today to find out what was the target for TODAY
+    let minutesDoneBeforeToday = $derived(
+        Math.max(0, currentTotalMinutes - todayWorkMinutes),
+    );
+
+    // The target for today (and subsequent days) based on work remaining at START of today
+    let requiredDaily = $derived(
+        calculateRequiredDaily(
+            minutesDoneBeforeToday,
+            targetHours,
+            remainingDays,
+        ),
+    );
+
+    // Status for today: Remaining or Extra
+    let todayStatus = $derived.by(() => {
+        const targetMin = requiredDaily.hours * 60 + requiredDaily.minutes;
+        const diff = targetMin - todayWorkMinutes;
+
+        if (diff > 0) {
+            return {
+                isExtra: false,
+                hours: Math.floor(diff / 60),
+                minutes: diff % 60,
+            };
+        } else {
+            const extra = Math.abs(diff);
+            return {
+                isExtra: true,
+                hours: Math.floor(extra / 60),
+                minutes: extra % 60,
+            };
+        }
+    });
 
     // Navigation Logic
     function handlePrev() {
@@ -210,11 +251,25 @@
                     ><CalendarDays class="h-2.5 w-2.5" />
                     {remainingDays}d Left</span
                 >
-                <span>{weeklyHours.toFixed(1)} / {targetHours}h</span>
-                <span class="flex items-center gap-1"
-                    ><Zap class="h-2.5 w-2.5 text-amber-500" /> Target {requiredDaily.hours}h
-                    {requiredDaily.minutes}m</span
-                >
+                <span
+                    >{weeklyHours.toFixed(1)} / {targetHours}h
+                    {#if todayStatus.isExtra}
+                        <span class="text-green-500 font-bold ml-1"
+                            >(+{todayStatus.hours}h {todayStatus.minutes}m)</span
+                        >
+                    {/if}
+                </span>
+                <div class="flex items-center gap-2">
+                    <span class="flex items-center gap-1"
+                        ><Zap class="h-2.5 w-2.5 text-amber-500" /> Target {requiredDaily.hours}h
+                        {requiredDaily.minutes}m</span
+                    >
+                    {#if !todayStatus.isExtra}
+                        <span class="text-muted-foreground/60">
+                            (Left {todayStatus.hours}h {todayStatus.minutes}m)
+                        </span>
+                    {/if}
+                </div>
             </div>
         </div>
 
