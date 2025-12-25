@@ -70,23 +70,34 @@ export async function fetchWorkData(start: Date, end: Date): Promise<WorkData> {
         const data = await response.json();
 
         // Backend returns array directly: [...]
-        // Ensure we handle that
         const rows = Array.isArray(data) ? data : [];
 
-        // Map raw backend data to internal WorkEntry format
-        const mappedEntries: WorkEntry[] = rows.map((item: any) => ({
-            date: item.date,
-            startTime: item.startTime || '',
-            endTime: item.endTime || '',
-            description: item.description || '',
-            // Calculate total duration in minutes from backend fields
-            // NOTE: duration should be tracked duration. Extra minutes are separate.
-            duration: (Number(item.hours || 0) * 60) + Number(item.minutes || 0),
-            extraminutes: Number(item.extraminutes || 0),
-            // Parse detailedWork if available
-            detailedWork: item.detailedWork ? (typeof item.detailedWork === 'string' ? JSON.parse(item.detailedWork) : item.detailedWork) : []
-        }));
+        // Generate all dates in range to ensure full week coverage
+        const allDates: string[] = [];
+        let currentDate = new Date(start);
+        while (currentDate <= end) {
+            allDates.push(format(currentDate, 'yyyy-MM-dd'));
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
 
+        // Map backend data to a lookup map
+        const backendDataMap = new Map(rows.map((item: any) => [item.date, item]));
+
+        // Create entries for all dates, merging backend data where it exists
+        const mappedEntries: WorkEntry[] = allDates.map(dateStr => {
+            const item = backendDataMap.get(dateStr) || {};
+            return {
+                date: dateStr,
+                startTime: item.startTime || '',
+                endTime: item.endTime || '',
+                description: item.description || '',
+                duration: (Number(item.hours || 0) * 60) + Number(item.minutes || 0),
+                extraminutes: Number(item.extraminutes || 0),
+                detailedWork: item.detailedWork ? (typeof item.detailedWork === 'string' ? JSON.parse(item.detailedWork) : item.detailedWork) : []
+            };
+        });
+
+        // Calculate totals from the filled entries
         return calculateTotals(mappedEntries);
     } catch (error) {
         console.error('Error fetching work data:', error);

@@ -1,5 +1,9 @@
 <script lang="ts">
-    import { currentWeekData, viewMode } from "$lib/stores/workData";
+    import {
+        currentWeekData,
+        previousWeekData,
+        viewMode,
+    } from "$lib/stores/workData";
     import {
         format,
         startOfWeek,
@@ -9,6 +13,9 @@
         endOfMonth,
         isSameWeek,
         isSameMonth,
+        subWeeks,
+        subMonths,
+        subYears,
     } from "date-fns";
     import {
         Accordion,
@@ -19,7 +26,19 @@
     import { Separator } from "$lib/components/ui/separator";
 
     let mode = $derived($viewMode);
-    let entries = $derived($currentWeekData.entries);
+
+    // Filter out future days
+    let todayStr = format(new Date(), "yyyy-MM-dd");
+
+    // Combine current and previous entries
+    let currentEntries = $derived($currentWeekData.entries);
+    let prevEntries = $derived($previousWeekData.entries);
+
+    let entries = $derived(
+        [...currentEntries, ...prevEntries]
+            .filter((e) => e.date <= todayStr)
+            .sort((a, b) => b.date.localeCompare(a.date)), // Ensure strict descending sort
+    );
 
     // Helper to format duration
     function formatDuration(minutes: number) {
@@ -41,6 +60,8 @@
         }
         return durationStr;
     }
+
+    // logic for comparison removed as we are showing full logs now
 
     // Grouper function
     function groupEntries(entries: any[], mode: "week" | "month" | "year") {
@@ -191,7 +212,7 @@
                                 >
                                     {formatDuration(
                                         groupEntries.reduce(
-                                            (acc, e) =>
+                                            (acc: number, e: any) =>
                                                 acc +
                                                 e.duration +
                                                 (e.extraminutes || 0),
