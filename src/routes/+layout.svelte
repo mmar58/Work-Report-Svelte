@@ -1,8 +1,20 @@
 <script lang="ts">
 	import "../app.css";
 	import { Toaster } from "$lib/components/ui/sonner";
+	import { theme } from "$lib/stores/settings";
+	import { browser } from "$app/environment";
 
 	let { children } = $props();
+
+	$effect(() => {
+		if (browser) {
+			const isDark =
+				$theme === "dark" ||
+				($theme === "system" &&
+					window.matchMedia("(prefers-color-scheme: dark)").matches);
+			document.documentElement.classList.toggle("dark", isDark);
+		}
+	});
 </script>
 
 <div

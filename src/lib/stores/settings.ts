@@ -25,14 +25,20 @@ export const shortDescription = persisted<string>(
     ''
 );
 
+export const theme = persisted<'light' | 'dark' | 'system'>(
+    'theme',
+    'dark' // Default to dark as per user preference
+);
+
 // Derived store combining all settings
 export const settings = derived(
-    [hourlyRate, targetHours, dollarRate, shortDescription],
-    ([$hourlyRate, $targetHours, $dollarRate, $shortDescription]) => ({
+    [hourlyRate, targetHours, dollarRate, shortDescription, theme],
+    ([$hourlyRate, $targetHours, $dollarRate, $shortDescription, $theme]) => ({
         hourlyRate: $hourlyRate,
         targetHours: $targetHours,
         dollarRate: $dollarRate,
-        shortDescription: $shortDescription
+        shortDescription: $shortDescription,
+        theme: $theme
     } as SettingsState)
 );
 

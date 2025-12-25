@@ -3,6 +3,7 @@
         settings,
         updateHourlyRate,
         updateTargetHours,
+        theme,
     } from "$lib/stores/settings";
     import {
         viewMode,
@@ -48,19 +49,15 @@
         endOfYear,
     } from "date-fns";
 
-    let theme = "dark";
-
     let showExtraTimeDialog = $state(false);
 
     function toggleTheme() {
-        if (document.documentElement.classList.contains("dark")) {
-            document.documentElement.classList.remove("dark");
-            theme = "light";
-        } else {
-            document.documentElement.classList.add("dark");
-            theme = "dark";
-        }
+        const newTheme = $theme === "light" ? "dark" : "light";
+        theme.set(newTheme);
     }
+
+    // NOTE: Theme application is now handled in +layout.svelte to ensure global persistence
+    // But we keep the toggle logic here.
 
     let tempHourlyRate = $state($settings.hourlyRate);
     let tempTargetHours = $state($settings.targetHours);
