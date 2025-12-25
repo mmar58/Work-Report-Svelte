@@ -7,7 +7,16 @@ import { browser } from '$app/environment';
 export function persisted<T>(key: string, initialValue: T): Writable<T> {
     // Get initial value from localStorage if in browser
     const stored = browser ? localStorage.getItem(key) : null;
-    const data = stored ? JSON.parse(stored) : initialValue;
+    let data: T = initialValue;
+
+    if (stored && stored !== "undefined") {
+        try {
+            data = JSON.parse(stored);
+        } catch (e) {
+            console.error(`Error parsing stored value for ${key}`, e);
+            data = initialValue;
+        }
+    }
 
     // Create writable store
     const store = writable<T>(data);
@@ -38,8 +47,13 @@ export function persistedWithTTL<T>(
 
     if (stored && timestamp) {
         const age = Date.now() - parseInt(timestamp, 10);
-        if (age < ttlMs) {
-            data = JSON.parse(stored);
+        if (age < ttlMs && stored !== "undefined") {
+            try {
+                data = JSON.parse(stored);
+            } catch (e) {
+                console.error(`Error parsing stored value for ${key}`, e);
+                // data remains initialValue
+            }
         } else {
             // Clear expired data
             if (browser) {

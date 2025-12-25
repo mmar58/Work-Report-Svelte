@@ -13,6 +13,7 @@
     import { toast } from "svelte-sonner";
     import { loadWorkData } from "$lib/stores/workData";
     import { format } from "date-fns";
+    import { config } from "$lib/config";
 
     let { open = $bindable(false) } = $props();
 
@@ -31,7 +32,7 @@
             // Better to fetch fresh from backend to ensure accuracy.
             // Using the existing /work-data endpoint which returns array
             const res = await fetch(
-                `http://localhost:88/work-data?startDate=${dateStr}&endDate=${dateStr}`,
+                `${config.api.baseUrl}/work-data?startDate=${dateStr}&endDate=${dateStr}`,
             );
             if (res.ok) {
                 const data = await res.json();
@@ -69,7 +70,7 @@
 
         try {
             const res = await fetch(
-                "http://localhost:88/update-extra-minutes",
+                `${config.api.baseUrl}/update-extra-minutes`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

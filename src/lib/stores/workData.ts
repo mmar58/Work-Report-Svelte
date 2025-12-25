@@ -1,6 +1,7 @@
 import { writable, derived, get } from 'svelte/store';
 import { format, startOfWeek, endOfWeek, subWeeks, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, subYears, isToday } from 'date-fns';
 import type { WorkData, WorkDataState, DateRange, WorkEntry, WorkTimeResponse } from '$lib/types';
+import { config } from '$lib/config';
 
 // View mode for determining comparison context
 export const viewMode = writable<'week' | 'month' | 'year'>('week');
@@ -59,7 +60,7 @@ export async function fetchWorkData(start: Date, end: Date): Promise<WorkData> {
 
     try {
         const response = await fetch(
-            `/api/work-data?startDate=${startStr}&endDate=${endStr}`
+            `${config.api.baseUrl}/work-data?startDate=${startStr}&endDate=${endStr}`
         );
 
         if (!response.ok) {
@@ -68,8 +69,12 @@ export async function fetchWorkData(start: Date, end: Date): Promise<WorkData> {
 
         const data = await response.json();
 
+        // Backend returns array directly: [...]
+        // Ensure we handle that
+        const rows = Array.isArray(data) ? data : [];
+
         // Map raw backend data to internal WorkEntry format
-        const mappedEntries: WorkEntry[] = (data.workData || []).map((item: any) => ({
+        const mappedEntries: WorkEntry[] = rows.map((item: any) => ({
             date: item.date,
             startTime: item.startTime || '',
             endTime: item.endTime || '',
@@ -79,7 +84,7 @@ export async function fetchWorkData(start: Date, end: Date): Promise<WorkData> {
             duration: (Number(item.hours || 0) * 60) + Number(item.minutes || 0),
             extraminutes: Number(item.extraminutes || 0),
             // Parse detailedWork if available
-            detailedWork: item.detailedWork ? JSON.parse(item.detailedWork) : []
+            detailedWork: item.detailedWork ? (typeof item.detailedWork === 'string' ? JSON.parse(item.detailedWork) : item.detailedWork) : []
         }));
 
         return calculateTotals(mappedEntries);
@@ -92,7 +97,7 @@ export async function fetchWorkData(start: Date, end: Date): Promise<WorkData> {
 // Fetch today's live work time
 export async function fetchTodayWork() {
     try {
-        const response = await fetch('/api/work-data/today');
+        const response = await fetch(`${config.api.baseUrl}/worktime`);
 
         if (!response.ok) {
             throw new Error('Failed to fetch today work');
@@ -164,28 +169,24 @@ async function mergeTodayData(currentData: WorkData, rangeStart: Date, rangeEnd:
         return { data: currentData, todayWork: null };
     }
 
-    const todayStr = format(today, 'yyyy-MM-dd');
-    const hasTodayData = currentData.entries.some(e => e.date === todayStr);
-
-    // Logic from React: if today exists, fetch /worktime (all?), if not fetch specific dates?
-    // Actually React logic: 
-    // const workTimeUrl = hasTodayData ? `${API_BASE_URL}/worktime` : `${API_BASE_URL}/worktime?dates=...`;
-
-    // We'll simplify: fetch today's specific worktime and merge it.
-    // The backend /worktime endpoint seems to return an array of processed days.
-
     try {
-        const todayWorkResponse = await fetchTodayWork(); // This uses /work-data/today which proxies to /worktime
+        const todayWorkResponse = await fetchTodayWork();
         if (!todayWorkResponse) return { data: currentData, todayWork: null };
+
+        // /worktime returns an array of objects
+        const todayData = Array.isArray(todayWorkResponse) ? todayWorkResponse[0] : todayWorkResponse;
+
+        if (!todayData) return { data: currentData, todayWork: null };
 
         // Calculate today's totals for the separate widget
         const todayWidgetData: WorkTimeResponse = {
-            hours: todayWorkResponse.hours,
-            minutes: todayWorkResponse.minutes,
-            totalMinutes: (todayWorkResponse.hours * 60) + todayWorkResponse.minutes
+            hours: Number(todayData.hours) || 0,
+            minutes: Number(todayData.minutes) || 0,
+            totalMinutes: (Number(todayData.hours || 0) * 60) + Number(todayData.minutes || 0)
         };
 
         // Merge into entries
+        const todayStr = format(today, 'yyyy-MM-dd');
         const entries = [...currentData.entries];
         const existingIndex = entries.findIndex(e => e.date === todayStr);
 
@@ -195,14 +196,15 @@ async function mergeTodayData(currentData: WorkData, rangeStart: Date, rangeEnd:
             endTime: '',
             duration: todayWidgetData.totalMinutes,
             description: 'Today',
-            detailedWork: todayWorkResponse.detailedWork ? JSON.parse(todayWorkResponse.detailedWork) : [],
+            detailedWork: todayData.detailedWork ? (typeof todayData.detailedWork === 'string' ? JSON.parse(todayData.detailedWork) : todayData.detailedWork) : [],
             extraminutes: existingIndex >= 0 ? entries[existingIndex].extraminutes : 0
         };
 
         if (existingIndex >= 0) {
             entries[existingIndex] = {
                 ...entries[existingIndex],
-                duration: newEntry.duration
+                duration: newEntry.duration,
+                detailedWork: newEntry.detailedWork // Also update detailed work
             };
         } else {
             entries.push(newEntry);
