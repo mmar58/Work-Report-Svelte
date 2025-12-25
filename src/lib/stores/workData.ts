@@ -43,7 +43,8 @@ export const error = derived(
 
 // Helper function to calculate totals from entries
 function calculateTotals(entries: WorkEntry[]): WorkData {
-    const totalMinutes = entries.reduce((sum, entry) => sum + entry.duration, 0);
+    // Sum duration + extra minutes for totals
+    const totalMinutes = entries.reduce((sum, entry) => sum + entry.duration + (entry.extraminutes || 0), 0);
     return {
         entries,
         totalHours: Math.floor(totalMinutes / 60),
@@ -74,7 +75,9 @@ export async function fetchWorkData(start: Date, end: Date): Promise<WorkData> {
             endTime: item.endTime || '',
             description: item.description || '',
             // Calculate total duration in minutes from backend fields
-            duration: (Number(item.hours || 0) * 60) + Number(item.minutes || 0) + Number(item.extraminutes || 0),
+            // NOTE: duration should be tracked duration. Extra minutes are separate.
+            duration: (Number(item.hours || 0) * 60) + Number(item.minutes || 0),
+            extraminutes: Number(item.extraminutes || 0),
             // Parse detailedWork if available
             detailedWork: item.detailedWork ? JSON.parse(item.detailedWork) : []
         }));
@@ -192,7 +195,8 @@ async function mergeTodayData(currentData: WorkData, rangeStart: Date, rangeEnd:
             endTime: '',
             duration: todayWidgetData.totalMinutes,
             description: 'Today',
-            detailedWork: todayWorkResponse.detailedWork ? JSON.parse(todayWorkResponse.detailedWork) : []
+            detailedWork: todayWorkResponse.detailedWork ? JSON.parse(todayWorkResponse.detailedWork) : [],
+            extraminutes: existingIndex >= 0 ? entries[existingIndex].extraminutes : 0
         };
 
         if (existingIndex >= 0) {

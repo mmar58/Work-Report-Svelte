@@ -7,6 +7,7 @@ export interface WorkEntry {
     duration: number; // minutes
     description?: string;
     detailedWork?: WorkSession[]; // Parsed from JSON string
+    extraminutes?: number;
 }
 
 export interface WorkSession {

@@ -128,11 +128,14 @@
                                 <span
                                     class="text-xs font-mono font-medium text-primary"
                                 >
-                                    {formatDuration(entry.duration)}
+                                    {formatDuration(
+                                        entry.duration +
+                                            (entry.extraminutes || 0),
+                                    )}
                                 </span>
                                 {#if entry.extraminutes > 0}
                                     <span
-                                        class="text-[10px] text-muted-foreground font-mono"
+                                        class="text-[10px] text-green-500 font-mono"
                                     >
                                         (+{formatDuration(entry.extraminutes)} extra)
                                     </span>
@@ -188,7 +191,10 @@
                                 >
                                     {formatDuration(
                                         groupEntries.reduce(
-                                            (acc, e) => acc + e.duration,
+                                            (acc, e) =>
+                                                acc +
+                                                e.duration +
+                                                (e.extraminutes || 0),
                                             0,
                                         ),
                                     )}
@@ -210,11 +216,28 @@
                                                     "EEE, MMM d",
                                                 )}
                                             </h5>
-                                            <span
-                                                class="text-[10px] font-mono opacity-80"
+                                            <div
+                                                class="flex flex-col items-end"
                                             >
-                                                {formatDuration(entry.duration)}
-                                            </span>
+                                                <span
+                                                    class="text-[10px] font-mono opacity-80"
+                                                >
+                                                    {formatDuration(
+                                                        entry.duration +
+                                                            (entry.extraminutes ||
+                                                                0),
+                                                    )}
+                                                </span>
+                                                {#if entry.extraminutes > 0}
+                                                    <span
+                                                        class="text-[10px] text-green-500 font-mono"
+                                                    >
+                                                        (+{formatDuration(
+                                                            entry.extraminutes,
+                                                        )} extra)
+                                                    </span>
+                                                {/if}
+                                            </div>
                                         </div>
 
                                         {#if entry.detailedWork && entry.detailedWork.length > 0}
