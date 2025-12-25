@@ -62,6 +62,7 @@
     let tempHourlyRate = $state($settings.hourlyRate);
     let tempTargetHours = $state($settings.targetHours);
     let isLoading = $state(false);
+    let isSettingsOpen = $state(false);
 
     $effect(() => {
         tempHourlyRate = $settings.hourlyRate;
@@ -250,7 +251,14 @@
             </Button>
 
             <!-- Settings Sheet -->
-            <Sheet.Root>
+            <Sheet.Root
+                bind:open={isSettingsOpen}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        handleRefresh();
+                    }
+                }}
+            >
                 <Sheet.Trigger>
                     {#snippet child({ props })}
                         <Button

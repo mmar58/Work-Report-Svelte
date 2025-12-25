@@ -232,6 +232,24 @@ async function mergeTodayData(currentData: WorkData, rangeStart: Date, rangeEnd:
     }
 }
 
+// Check if today is visible and refresh data
+export async function refreshTodayDataIfVisible() {
+    const range = get(dateRange);
+    const today = new Date();
+
+    // Check if today is within range (inclusive)
+    if (today >= range.startDate && today <= range.endDate) {
+        const { currentWeek } = get(workDataState);
+        const { data: updatedData, todayWork } = await mergeTodayData(currentWeek, range.startDate, range.endDate);
+
+        workDataState.update(state => ({
+            ...state,
+            currentWeek: updatedData,
+            todayWork
+        }));
+    }
+}
+
 // Navigate to next period (context-aware based on view mode)
 export function nextPeriod() {
     // Implementation for next period navigation

@@ -6,7 +6,11 @@
     import ReportChart from "$lib/components/ReportChart.svelte";
     import DailyLogs from "$lib/components/DailyLogs.svelte";
     import * as Resizable from "$lib/components/ui/resizable";
-    import { loadWorkData, dateRange } from "$lib/stores/workData";
+    import {
+        loadWorkData,
+        dateRange,
+        refreshTodayDataIfVisible,
+    } from "$lib/stores/workData";
     import {
         syncHourlyRateFromAPI,
         syncTargetHoursFromAPI,
@@ -15,14 +19,26 @@
     import { onMount } from "svelte";
 
     // Force HMR refresh
-    onMount(async () => {
+    onMount(() => {
         // Initial data load
-        await Promise.all([
+        Promise.all([
             loadWorkData(),
             syncHourlyRateFromAPI(),
             syncTargetHoursFromAPI(),
             fetchCurrencyRate(),
         ]);
+
+        // Auto-fetch today's data every 5 minutes (300000 ms)
+        const intervalId = setInterval(
+            () => {
+                refreshTodayDataIfVisible();
+            },
+            5 * 60 * 1000,
+        );
+
+        return () => {
+            clearInterval(intervalId);
+        };
     });
 </script>
 
