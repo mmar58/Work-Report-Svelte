@@ -172,32 +172,7 @@
             </div>
 
             <!-- Compact Date Navigator -->
-            <div
-                class="hidden md:flex items-center gap-1 bg-background/50 rounded-lg p-0.5 border shadow-sm ml-2"
-            >
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onclick={handlePrev}
-                    class="h-6 w-6"
-                >
-                    <ChevronLeft class="h-3.5 w-3.5" />
-                </Button>
-                <div
-                    class="flex items-center gap-2 px-2 min-w-[140px] justify-center font-medium font-mono text-xs"
-                >
-                    <Calendar class="h-3 w-3 text-muted-foreground" />
-                    <span>{formattedRange}</span>
-                </div>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onclick={handleNext}
-                    class="h-6 w-6"
-                >
-                    <ChevronRight class="h-3.5 w-3.5" />
-                </Button>
-            </div>
+
         </div>
 
         <!-- CENTER: Weekly Goal Widget -->

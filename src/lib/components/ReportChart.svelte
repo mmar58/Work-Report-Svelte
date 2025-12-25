@@ -35,7 +35,15 @@
         endOfMonth,
         startOfYear,
         endOfYear,
+        addWeeks,
+        subWeeks,
+        addMonths,
+        subMonths,
+        addYears,
+        subYears,
+        format,
     } from "date-fns";
+    import { ChevronLeft, ChevronRight, Calendar } from "lucide-svelte";
 
     Chart.register(
         Title,
@@ -73,6 +81,62 @@
         }
         loadWorkData();
     }
+
+    function handlePrev() {
+        const { startDate, endDate } = $dateRange;
+        if ($viewMode === "week") {
+            $dateRange = {
+                startDate: subWeeks(startDate, 1),
+                endDate: subWeeks(endDate, 1),
+            };
+        } else if ($viewMode === "month") {
+            const prevMonth = subMonths(startDate, 1);
+            $dateRange = {
+                startDate: startOfMonth(prevMonth),
+                endDate: endOfMonth(prevMonth),
+            };
+        } else if ($viewMode === "year") {
+            const prevYear = subYears(startDate, 1);
+            $dateRange = {
+                startDate: startOfYear(prevYear),
+                endDate: endOfYear(prevYear),
+            };
+        }
+        loadWorkData();
+    }
+
+    function handleNext() {
+        const { startDate, endDate } = $dateRange;
+        if ($viewMode === "week") {
+            $dateRange = {
+                startDate: addWeeks(startDate, 1),
+                endDate: addWeeks(endDate, 1),
+            };
+        } else if ($viewMode === "month") {
+            const nextMonth = addMonths(startDate, 1);
+            $dateRange = {
+                startDate: startOfMonth(nextMonth),
+                endDate: endOfMonth(nextMonth),
+            };
+        } else if ($viewMode === "year") {
+            const nextYear = addYears(startDate, 1);
+            $dateRange = {
+                startDate: startOfYear(nextYear),
+                endDate: endOfYear(nextYear),
+            };
+        }
+        loadWorkData();
+    }
+
+    let formattedRange = $derived.by(() => {
+        if ($viewMode === "year") {
+            return format($dateRange.startDate, "yyyy");
+        }
+        if ($viewMode === "month") {
+            return format($dateRange.startDate, "MMMM yyyy");
+        }
+        return `${format($dateRange.startDate, "MMM d")} - ${format($dateRange.endDate, "MMM d, yyyy")}`;
+    });
 
     // Prepare data for chart
     let chartData = $derived.by(() => {
@@ -341,37 +405,67 @@
 </script>
 
 <Card class="h-full shadow-md border-none flex flex-col">
-    <CardHeader class="pb-2 flex-row items-center justify-between space-y-0">
-        <CardTitle class="text-sm font-medium text-muted-foreground w-full"
-            >Work Activity</CardTitle
-        >
-        <DropdownMenu.Root>
-            <DropdownMenu.Trigger>
-                {#snippet child({ props })}
+    <CardHeader class="pb-4">
+        <div class="flex items-start justify-between w-full">
+            <div class="flex flex-col items-start gap-2">
+                <CardTitle class="text-sm font-medium text-muted-foreground"
+                    >Work Activity</CardTitle
+                >
+                <div
+                    class="flex items-center gap-1 bg-background/50 rounded-lg p-0.5 border shadow-sm"
+                >
                     <Button
-                        variant="outline"
-                        size="sm"
-                        class="h-7 text-xs gap-1"
-                        {...props}
+                        variant="ghost"
+                        size="icon"
+                        onclick={handlePrev}
+                        class="h-6 w-6"
                     >
-                        <span class="capitalize">{mode} View</span>
-                        <ChevronDown class="h-3 w-3 opacity-50" />
+                        <ChevronLeft class="h-3.5 w-3.5" />
                     </Button>
-                {/snippet}
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content align="end">
-                <DropdownMenu.Item onclick={() => setMode("week")}
-                    >Week View</DropdownMenu.Item
-                >
-                <DropdownMenu.Item onclick={() => setMode("month")}
-                    >Month View</DropdownMenu.Item
-                >
-                <DropdownMenu.Item onclick={() => setMode("year")}
-                    >Year View</DropdownMenu.Item
-                >
-            </DropdownMenu.Content>
-        </DropdownMenu.Root>
-    </CardHeader>
+                    <div
+                        class="flex items-center gap-2 px-2 min-w-[140px] justify-center font-medium font-mono text-xs"
+                    >
+                        <Calendar class="h-3 w-3 text-muted-foreground" />
+                        <span>{formattedRange}</span>
+                    </div>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onclick={handleNext}
+                        class="h-6 w-6"
+                    >
+                        <ChevronRight class="h-3.5 w-3.5" />
+                    </Button>
+                </div>
+            </div>
+            <DropdownMenu.Root>
+                <DropdownMenu.Trigger>
+                    {#snippet child({ props })}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            class="h-7 text-xs gap-1"
+                            {...props}
+                        >
+                            <span class="capitalize">{mode} View</span>
+                            <ChevronDown class="h-3 w-3 opacity-50" />
+                        </Button>
+                    {/snippet}
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content align="end">
+                    <DropdownMenu.Item onclick={() => setMode("week")}
+                        >Week View</DropdownMenu.Item
+                    >
+                    <DropdownMenu.Item onclick={() => setMode("month")}
+                        >Month View</DropdownMenu.Item
+                    >
+                    <DropdownMenu.Item onclick={() => setMode("year")}
+                        >Year View</DropdownMenu.Item
+                    >
+                </DropdownMenu.Content>
+            </DropdownMenu.Root>
+        </div></CardHeader
+    >
     <CardContent class="h-[300px] relative flex-1 min-h-0">
         <div class="w-full h-full {hasData ? 'block' : 'hidden'}">
             <canvas bind:this={canvas} class="w-full h-full"></canvas>
