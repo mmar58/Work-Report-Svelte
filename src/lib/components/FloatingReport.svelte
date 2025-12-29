@@ -28,8 +28,8 @@
         if (!$dateRange.startDate || !$dateRange.endDate) return "";
         const start = $dateRange.startDate;
         const end = $dateRange.endDate;
-        // MM.DD.YY format
-        return `${start.getMonth() + 1}.${start.getDate()}.${start.getFullYear().toString().slice(-2)} - ${end.getMonth() + 1}.${end.getDate()}.${end.getFullYear().toString().slice(-2)}`;
+        // MM.dd.yy format
+        return `${format(start, "MM.dd.yy")} - ${format(end, "MM.dd.yy")}`;
     });
 
     let totalHours = $derived($currentWeekData.totalHours);
