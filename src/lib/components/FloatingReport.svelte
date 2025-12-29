@@ -36,10 +36,12 @@
     let totalMinutes = $derived($currentWeekData.totalMinutes);
 
     // Earnings Calculation matches TimeReport logic
-    let earningsUSD = $derived(
+    let earningsBDT = $derived(
         calculateEarnings(totalHours, totalMinutes, $settings.hourlyRate),
     );
-    let earningsBDT = $derived(earningsUSD * $settings.dollarRate);
+    let earningsUSD = $derived(
+        $settings.dollarRate > 0 ? earningsBDT / $settings.dollarRate : 0,
+    );
 
     let reportRef: HTMLElement;
 
