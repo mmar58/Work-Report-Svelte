@@ -4,12 +4,17 @@
         previousWeekData,
         viewMode,
     } from "$lib/stores/workData";
-    import { settings } from "$lib/stores/settings";
+    import { settings, fetchCurrencyRate } from "$lib/stores/settings";
     import { Card, CardContent } from "$lib/components/ui/card";
     import { Separator } from "$lib/components/ui/separator";
     import { formatDuration, formatMoney } from "$lib/utils/formatters";
     import { calculateEarnings } from "$lib/utils/calculations";
     import { ArrowUp, ArrowDown, Clock, DollarSign } from "lucide-svelte";
+    import { onMount } from "svelte";
+
+    onMount(() => {
+        fetchCurrencyRate();
+    });
 
     // Reactive calculations
     let currentHours = $derived($currentWeekData.totalHours);
@@ -26,7 +31,10 @@
     let prevEarnings = $derived(
         calculateEarnings(prevHours, prevMinutes, $settings.hourlyRate),
     );
-    let currentEarningsBDT = $derived(currentEarnings * $settings.dollarRate);
+
+    let currentEarningsUSD = $derived(
+        $settings.dollarRate > 0 ? currentEarnings / $settings.dollarRate : 0,
+    );
 
     // Comparisons
     let timeDiff = $derived(currentTotalMinutes - prevTotalMinutes);
@@ -86,14 +94,23 @@
             <span class="text-[10px] text-muted-foreground font-medium"
                 >Estimated Earnings</span
             >
-            <span
-                class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600 leading-tight"
-            >
-                {formatMoney(currentEarnings)}
-            </span>
+            <div class="flex items-baseline gap-2 flex-wrap">
+                <span
+                    class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600 leading-tight"
+                >
+                    {formatMoney(currentEarnings, "BDT")}
+                </span>
+                {#if $settings.dollarRate > 0}
+                    <span class="text-sm text-muted-foreground/80 font-medium">
+                        ({formatMoney(currentEarningsUSD, "USD")})
+                    </span>
+                {/if}
+            </div>
             {#if $settings.dollarRate > 0}
-                <span class="text-[9px] text-muted-foreground/60 font-mono">
-                    ৳ {formatMoney(currentEarningsBDT, "BDT")}
+                <span
+                    class="text-[9px] text-muted-foreground/60 font-mono mt-0.5"
+                >
+                    1 USD = {formatMoney($settings.dollarRate, "BDT")}
                 </span>
             {/if}
         </div>

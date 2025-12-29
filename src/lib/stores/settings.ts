@@ -14,11 +14,8 @@ export const targetHours = persisted<number>(
     config.defaults.targetHours
 );
 
-export const dollarRate = persistedWithTTL<number>(
-    'dollarRate',
-    0,
-    config.cache.currencyRateTTL
-);
+export const dollarRate = persisted<number>('dollarRate', 0);
+export const dollarRateTimestamp = persisted<number>('dollarRateTimestamp', 0);
 
 export const shortDescription = persisted<string>(
     'shortDescription',
@@ -98,20 +95,35 @@ export async function updateTargetHours(hours: number) {
 
 export async function fetchCurrencyRate() {
     const currentRate = get(dollarRate);
+    const lastUpdated = get(dollarRateTimestamp);
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000; // 1 hour
 
-    // Return cached rate if valid
-    if (currentRate > 0) {
+    // Return cached rate if fresh (less than 1 hour old)
+    if (currentRate > 0 && (now - lastUpdated) < oneHour) {
         return currentRate;
     }
 
     try {
         const response = await fetch(config.api.currencyUrl);
+        // Response format: {"date":"...","base":"USD","rates":{"BDT":"122.335"}}
         const data = await response.json();
-        const rate = data.geoplugin_currencyConverter || 0;
-        dollarRate.set(rate);
-        return rate;
+
+        let newRate = 0;
+        if (data.rates && data.rates.BDT) {
+            newRate = parseFloat(data.rates.BDT);
+        } else if (data.geoplugin_currencyConverter) {
+            newRate = Number(data.geoplugin_currencyConverter);
+        }
+
+        if (newRate > 0) {
+            dollarRate.set(newRate);
+            dollarRateTimestamp.set(now);
+            return newRate;
+        }
     } catch (error) {
         console.error('Failed to fetch currency rate:', error);
-        return 0;
     }
+
+    return currentRate;
 }
