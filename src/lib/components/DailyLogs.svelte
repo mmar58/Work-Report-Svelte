@@ -4,6 +4,7 @@
         previousWeekData,
         viewMode,
     } from "$lib/stores/workData";
+    import { settings } from "$lib/stores/settings";
     import {
         format,
         startOfWeek,
@@ -161,6 +162,29 @@
                                         (+{formatDuration(entry.extraminutes)} extra)
                                     </span>
                                 {/if}
+                                {#if $settings.targetHours > 0}
+                                    {@const totalDaily =
+                                        entry.duration +
+                                        (entry.extraminutes || 0)}
+                                    {@const dailyTarget =
+                                        ($settings.targetHours * 60) / 7}
+                                    {@const diff = totalDaily - dailyTarget}
+                                    {#if Math.abs(diff) > 1}
+                                        <!-- Ignore negligible diffs -->
+                                        <span
+                                            class="text-[10px] font-mono {diff >
+                                            0
+                                                ? 'text-green-500'
+                                                : 'text-red-500'}"
+                                        >
+                                            {diff > 0
+                                                ? "+"
+                                                : "-"}{formatDuration(
+                                                Math.abs(diff),
+                                            )}
+                                        </span>
+                                    {/if}
+                                {/if}
                             </div>
                         </div>
 
@@ -257,6 +281,33 @@
                                                             entry.extraminutes,
                                                         )} extra)
                                                     </span>
+                                                {/if}
+                                                {#if $settings.targetHours > 0}
+                                                    {@const totalDaily =
+                                                        entry.duration +
+                                                        (entry.extraminutes ||
+                                                            0)}
+                                                    {@const dailyTarget =
+                                                        ($settings.targetHours *
+                                                            60) /
+                                                        7}
+                                                    {@const diff =
+                                                        totalDaily -
+                                                        dailyTarget}
+                                                    {#if Math.abs(diff) > 1}
+                                                        <span
+                                                            class="text-[10px] font-mono {diff >
+                                                            0
+                                                                ? 'text-green-500'
+                                                                : 'text-red-500'}"
+                                                        >
+                                                            {diff > 0
+                                                                ? "+"
+                                                                : "-"}{formatDuration(
+                                                                Math.abs(diff),
+                                                            )}
+                                                        </span>
+                                                    {/if}
                                                 {/if}
                                             </div>
                                         </div>
