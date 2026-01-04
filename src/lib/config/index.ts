@@ -2,7 +2,13 @@ import { env } from '$env/dynamic/public';
 
 export const config = {
     api: {
-        baseUrl: env.PUBLIC_API_BASE_URL || 'http://192.168.0.2:88',
+        baseUrl: (() => {
+            if (typeof window === 'undefined') return 'http://localhost:88';
+            const { protocol, hostname } = window.location;
+            if (protocol === 'https:') return `https://${hostname}:88`;
+            if (hostname === 'localhost') return 'http://localhost:88';
+            return 'http://192.168.0.2:88'; // Default for other HTTP
+        })(),
         currencyUrl: env.PUBLIC_CURRENCY_API_URL || 'http://www.geoplugin.net/json.gp'
     },
     defaults: {
