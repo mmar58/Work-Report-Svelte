@@ -1,108 +1,87 @@
-const express = require("express");
-const cors = require("cors");
-const http = require("http");
+
 const demoStore = require("./DemoDataStore");
 const moment = require("moment-timezone");
 
-const app = express();
-const server = http.createServer(app);
-const port = 4401;
+function setupDemoBackend(app) {
+    const userTimeZone = "Asia/Dhaka";
 
-app.use(express.json());
-app.use(cors({
-    origin: (origin, callback) => {
-        callback(null, true)
-    }
-}));
-
-const userTimeZone = "Asia/Dhaka";
-
-// Mock Video Gallery setup if needed to prevent errors if frontend calls it?
-// Or just ignore. The request is specific to "showcase the work report".
-
-app.get("/", (req, res) => {
-    res.send("Hello, World! (Demo Mode)");
-});
-
-// API to get work data based on date range
-app.get("/work-data", (req, res) => {
-    let { startDate, endDate } = req.query;
-
-    if (!startDate) {
-        return res.status(400).json({ error: "Start date is required" });
-    }
-
-    // Generate/Get data for all days in range
-    // Assume startDate and endDate are YYYY-MM-DD
-    const end = endDate || startDate;
-    const results = demoStore.getDataRange(startDate, end);
-    res.json(results);
-});
-
-// API Endpoint for specific dates (used by "fetchTodayWork")
-app.get("/worktime", (req, res) => {
-    // dates param is comma separated, creates array
-    // input format from frontend is sometimes DD-MM-YYYY or YYYY-MM-DD
-    // My store expects YYYY-MM-DD normalization.
-
-    let datesParam = req.query.dates;
-    if (!datesParam) {
-        datesParam = moment().tz(userTimeZone).format("YYYY-MM-DD");
-    }
-
-    let dates = datesParam.split(",");
-    let results = [];
-
-    dates.forEach(date => {
-        // Need to ensure format is parsed correctly.
-        // If frontend sends DD-MM-YYYY (e.g. 09-01-2026), moment needs to know.
-        // Let's try flexible parsing.
-        let m = moment(date, ["YYYY-MM-DD", "DD-MM-YYYY"]);
-        if (m.isValid()) {
-            const yyyymmdd = m.format("YYYY-MM-DD");
-            const data = demoStore.getData(yyyymmdd);
-
-            // The original backend returns date as DD-MM-YYYY sometimes in the `worktime` endpoint?
-            // Let's enable returning DD-MM-YYYY if that's what frontend expects for matching.
-            // Looking at frontend `workData.ts`:
-            // `const [d, m, y] = item.date.split('-');` -> expects DD-MM-YYYY?
-            // But my store returns YYYY-MM-DD in `getData`.
-
-            // Let's clone and format date field for response to match old backend behavior if needed.
-            // Old backend python script returns DD-MM-YYYY.
-            // Let's modify the response object slightly.
-
-            const responseData = { ...data };
-            responseData.date = m.format("DD-MM-YYYY");
-            results.push(responseData);
-        }
+    app.get("/", (req, res, next) => {
+        // Only respond if the request specifically targets the demo root, 
+        // but since this is attached to a main app, "/" might be taken.
+        // The user said "add/serve... with another backend". 
+        // If we hijack "/", it might break the main app. 
+        // But for now, I will keep it as requested, maybe the user wants it.
+        // Or I can add a specialized message? 
+        // The previous code had `res.send("Hello, World! (Demo Mode)")`.
+        // I will comment it out or make it specific to avoid conflict? 
+        // User asked for "demo-backend api's", usually implying the functionality ones.
+        // Ill keep it but maybe it will just overwrite or stack. Express executes in order.
+        // If I append this *after* other routes, it might not be reached if others match.
+        // Let's keep the logic simple.
+        // res.send("Hello, World! (Demo Mode)");
+        next();
     });
 
-    res.json(results);
-});
+    // API to get work data based on date range
+    app.get("/work-data", (req, res) => {
+        let { startDate, endDate } = req.query;
 
-app.get("/hourlyRate", (req, res) => {
-    res.json(50); // Mock rate
-});
+        if (!startDate) {
+            return res.status(400).json({ error: "Start date is required" });
+        }
 
-app.get("/getTargetHours", (req, res) => {
-    res.json(40);
-});
+        const end = endDate || startDate;
+        const results = demoStore.getDataRange(startDate, end);
+        res.json(results);
+    });
 
-app.get("/setTargetHours", (req, res) => {
-    res.json(parseInt(req.query.hours) || 40);
-});
+    // API Endpoint for specific dates (used by "fetchTodayWork")
+    app.get("/worktime", (req, res) => {
+        let datesParam = req.query.dates;
+        if (!datesParam) {
+            datesParam = moment().tz(userTimeZone).format("YYYY-MM-DD");
+        }
 
-app.post("/update-extra-minutes", (req, res) => {
-    const { date, minutes } = req.body;
-    if (!date || minutes === undefined) {
-        return res.status(400).json({ error: "Date and minutes are required" });
-    }
+        let dates = datesParam.split(",");
+        let results = [];
 
-    demoStore.updateExtraMinutes(date, minutes);
-    res.json({ message: "Extra minutes updated successfully (Demo)" });
-});
+        dates.forEach(date => {
+            let m = moment(date, ["YYYY-MM-DD", "DD-MM-YYYY"]);
+            if (m.isValid()) {
+                const yyyymmdd = m.format("YYYY-MM-DD");
+                const data = demoStore.getData(yyyymmdd);
 
-server.listen(port, () => {
-    console.log("🚀 Demo Server running on http://localhost:" + port);
-});
+                const responseData = { ...data };
+                responseData.date = m.format("DD-MM-YYYY");
+                results.push(responseData);
+            }
+        });
+
+        res.json(results);
+    });
+
+    app.get("/hourlyRate", (req, res) => {
+        res.json(50); // Mock rate
+    });
+
+    app.get("/getTargetHours", (req, res) => {
+        res.json(40);
+    });
+
+    app.get("/setTargetHours", (req, res) => {
+        res.json(parseInt(req.query.hours) || 40);
+    });
+
+    app.post("/update-extra-minutes", (req, res) => {
+        const { date, minutes } = req.body;
+        if (!date || minutes === undefined) {
+            return res.status(400).json({ error: "Date and minutes are required" });
+        }
+
+        demoStore.updateExtraMinutes(date, minutes);
+        res.json({ message: "Extra minutes updated successfully (Demo)" });
+    });
+
+    console.log("🚀 Demo Backend routes attached.");
+}
+module.exports = setupDemoBackend
