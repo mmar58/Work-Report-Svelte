@@ -265,7 +265,7 @@ async function mergeTodayData(currentData: WorkData, rangeStart: Date, rangeEnd:
                 duration: totalMinutes,
                 description: item.mote || item.note || 'Synced', // 'mote' typo in python script
                 detailedWork: item.detailedWork ? (typeof item.detailedWork === 'string' ? JSON.parse(item.detailedWork) : item.detailedWork) : [],
-                extraminutes: Number(item.extraMinutes || 0)
+                extraminutes: Number(item.extraminutes || item.extraMinutes || 0)
             };
 
             if (existingIndex >= 0) {

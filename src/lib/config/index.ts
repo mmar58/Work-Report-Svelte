@@ -6,8 +6,8 @@ export const config = {
             if (typeof window === 'undefined') return 'http://localhost:88';
             const { protocol, hostname } = window.location;
             if (protocol === 'https:') return `https://${hostname}:88`;
-            if (hostname === 'localhost') return 'http://localhost:88';
-            return 'http://192.168.0.2:88'; // Default for other HTTP
+            if (hostname === 'localhost') return 'http://localhost:4401';
+            return 'http://192.168.0.2:4401'; // Default for other HTTP
         })(),
         currencyUrl: env.PUBLIC_CURRENCY_API_URL || 'http://www.geoplugin.net/json.gp'
     },
