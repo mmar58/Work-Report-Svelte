@@ -84,4 +84,32 @@ function setupDemoBackend(app) {
 
     console.log("🚀 Demo Backend routes attached.");
 }
-module.exports = setupDemoBackend
+
+module.exports = setupDemoBackend;
+
+if (require.main === module) {
+    const express = require("express");
+    const cors = require("cors");
+    const app = express();
+
+    app.use(cors());
+    app.use(express.json());
+
+    setupDemoBackend(app);
+
+    // Parse port from command line args or env
+    const args = process.argv.slice(2);
+    let port = process.env.PORT || 3000;
+
+    for (let i = 0; i < args.length; i++) {
+        if (args[i] === '--port' && args[i + 1]) {
+            port = parseInt(args[i + 1], 10);
+            break;
+        }
+    }
+
+    app.listen(port, () => {
+        console.log(`Standalone Demo Backend running on http://localhost:${port}`);
+        console.log(`Test URL: http://localhost:${port}/worktime`);
+    });
+}
