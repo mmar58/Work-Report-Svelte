@@ -1,0 +1,1 @@
+export const env={"PUBLIC_API_BASE_URL":"http://192.168.0.2:88","PUBLIC_CURRENCY_API_URL":"https://api.currencyfreaks.com/v2.0/rates/latest?apikey=e63488f85b8349e9a5921e0c1f837ca3&symbols=BDT&base=USD","PUBLIC_ENABLE_DARK_MODE":"true","PUBLIC_ENABLE_PDF_EXPORT":"true","PUBLIC_DEFAULT_HOURLY_RATE":"121","PUBLIC_DEFAULT_TARGET_HOURS":"40"}
