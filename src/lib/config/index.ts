@@ -5,9 +5,9 @@ export const config = {
         baseUrl: (() => {
             if (typeof window === 'undefined') return 'http://localhost:88';
             const { protocol, hostname } = window.location;
-            if (protocol === 'https:') return `https://${hostname}:88`;
+            if (protocol === 'https:') return `https://workreportdemo.anzdeveloper.com`;
             if (hostname === 'localhost') return 'http://localhost:4401';
-            return 'http://142.171.172.162:4401'; // Default for other HTTP
+            return 'http://workreportdemo.anzdeveloper.com'; // Default for other HTTP
         })(),
         currencyUrl: env.PUBLIC_CURRENCY_API_URL || 'http://www.geoplugin.net/json.gp'
     },
