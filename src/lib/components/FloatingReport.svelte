@@ -114,7 +114,7 @@
                 </p>
                 <p>
                     <strong class="text-foreground">BDT:</strong>
-                    {formatMoney(earningsBDT, "BDT")}
+                    {formatMoney(earningsBDT)}
                 </p>
                 <p>
                     <strong class="text-foreground">USD (from Google):</strong>
