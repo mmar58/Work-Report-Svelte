@@ -55,6 +55,11 @@
         BarController,
     );
 
+    // Set a safe system font stack globally so canvas text never falls back
+    // to a CJK/emoji font while "Outfit" (the app font) is still loading.
+    const CHART_FONT = "Outfit, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+    Chart.defaults.font.family = CHART_FONT;
+
     let canvas: HTMLCanvasElement;
     let chartInstance: Chart | null = null;
     let mode = $derived($viewMode);
@@ -317,17 +322,17 @@
                                     pointStyle: "circle",
                                     boxWidth: 8,
                                     padding: 20,
-                                    font: { family: "Inter", size: 11 },
+                                    font: { family: CHART_FONT, size: 11 },
                                 },
                             },
                             tooltip: {
                                 backgroundColor: "rgba(15, 23, 42, 0.9)",
                                 titleFont: {
-                                    family: "Inter",
+                                    family: CHART_FONT,
                                     size: 13,
-                                    weight: "600",
+                                    weight: 600,
                                 },
-                                bodyFont: { family: "Inter", size: 12 },
+                                bodyFont: { family: CHART_FONT, size: 12 },
                                 padding: 10,
                                 cornerRadius: 8,
                                 displayColors: false,
@@ -359,7 +364,7 @@
                                     color: "rgba(148, 163, 184, 0.1)",
                                 },
                                 ticks: {
-                                    font: { family: "Inter", size: 10 },
+                                    font: { family: CHART_FONT, size: 10 },
                                     color: "rgba(148, 163, 184, 0.8)",
                                     callback: (val) => val + "h",
                                 },
@@ -369,9 +374,9 @@
                                 grid: { display: false },
                                 ticks: {
                                     font: {
-                                        family: "Inter",
+                                        family: CHART_FONT,
                                         size: 11,
-                                        weight: "500",
+                                        weight: 500,
                                     },
                                     color: "rgba(148, 163, 184, 0.8)",
                                 },
@@ -395,6 +400,16 @@
         if (chartInstance) {
             chartInstance.destroy();
         }
+    });
+
+    // After all fonts finish loading, re-render the chart so axis/legend/tooltip
+    // text uses the correct glyphs instead of the pre-load fallback font.
+    onMount(() => {
+        document.fonts.ready.then(() => {
+            if (chartInstance) {
+                chartInstance.update();
+            }
+        });
     });
 
     // Derived state for visibility
