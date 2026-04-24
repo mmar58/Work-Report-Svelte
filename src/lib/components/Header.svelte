@@ -228,17 +228,17 @@
 <header
     class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/40 transition-all"
 >
-    <div class="container flex h-14 items-center justify-between">
-        <div class="flex items-center gap-4 min-w-[300px]">
+    <div class="w-full px-4 flex h-16 items-center justify-between gap-4">
+        <div class="flex items-center gap-4 shrink-0">
             <!-- Brand -->
             <div class="flex items-center gap-3">
                 <div
                     class="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-inner"
                 >
-                    <span class="font-black text-xs tracking-tighter">WR</span>
+                    <span class="font-black text-sm tracking-tighter">WR</span>
                 </div>
                 <span
-                    class="font-bold text-lg tracking-tight bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent hidden sm:inline-block"
+                    class="font-bold text-xl tracking-tight bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent hidden sm:inline-block"
                     >WorkReport</span
                 >
             </div>
@@ -247,10 +247,10 @@
             <Button
                 variant="outline"
                 size="sm"
-                class="ml-2 h-7 text-xs gap-1 hidden md:flex"
+                class="ml-2 h-8 text-sm gap-1 hidden md:flex"
                 onclick={() => (showExtraTimeDialog = true)}
             >
-                <CalendarDays class="h-3 w-3" />
+                <CalendarDays class="h-3.5 w-3.5" />
                 <span>Add Extra</span>
             </Button>
 
@@ -261,25 +261,25 @@
 
         <!-- CENTER: Weekly Goal Widget -->
         <div
-            class="hidden lg:flex flex-col items-center justify-center gap-1 w-[320px]"
+            class="hidden lg:flex flex-col items-center justify-center gap-1 flex-1 min-w-0 max-w-[560px] mx-auto"
         >
             <div
-                class="flex items-center justify-between w-full text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-1"
+                class="flex items-center justify-between w-full text-xs uppercase font-bold tracking-wider text-muted-foreground px-1"
             >
                 <span class="flex items-center gap-1"
-                    ><Target class="h-3 w-3" /> Weekly Goal</span
+                    ><Target class="h-3.5 w-3.5" /> Weekly Goal</span
                 >
                 <span>{percentage.toFixed(0)}%</span>
             </div>
             <Progress value={percentage} class="h-1.5 w-full bg-secondary" />
             <div
-                class="flex items-center justify-between w-full text-[10px] font-mono text-muted-foreground px-1 opacity-80"
+                class="flex items-center justify-between w-full text-xxs font-mono text-muted-foreground px-1 opacity-80 gap-3"
             >
-                <span class="flex items-center gap-1"
-                    ><CalendarDays class="h-2.5 w-2.5" />
+                <span class="flex items-center gap-1 whitespace-nowrap shrink-0"
+                    ><CalendarDays class="h-3 w-3" />
                     {remainingDays}d Left</span
                 >
-                <span
+                <span class="whitespace-nowrap shrink-0"
                     >{weeklyHours.toFixed(1)} / {targetHours}h
                     {#if todayStatus.isExtra}
                         <span class="text-green-500 font-bold ml-1"
@@ -287,13 +287,13 @@
                         >
                     {/if}
                 </span>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 whitespace-nowrap shrink-0">
                     <span class="flex items-center gap-1"
-                        ><Zap class="h-2.5 w-2.5 text-amber-500" /> Target {requiredDaily.hours}h
+                        ><Zap class="h-3 w-3 text-amber-500" /> Target {requiredDaily.hours}h
                         {requiredDaily.minutes}m</span
                     >
                     {#if !todayStatus.isExtra}
-                        <span class="text-muted-foreground/60">
+                        <span class="text-muted-foreground/60 whitespace-nowrap">
                             (Left {todayStatus.hours}h {todayStatus.minutes}m)
                         </span>
                     {/if}
@@ -301,7 +301,7 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-1 justify-end min-w-[300px]">
+        <div class="flex items-center gap-1 justify-end shrink-0">
             <!-- Refresh Button -->
             <Button
                 variant="ghost"
