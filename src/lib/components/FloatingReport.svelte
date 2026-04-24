@@ -2,7 +2,6 @@
     import {
         settings,
         shortDescription,
-        dollarRate,
     } from "$lib/stores/settings";
     import { currentWeekData, dateRange } from "$lib/stores/workData"; // Import work data
     import { Input } from "$lib/components/ui/input";
@@ -69,36 +68,28 @@
     <Card
         class="w-full h-full shadow-lg border-primary/10 bg-card/50 backdrop-blur-sm flex flex-col"
     >
-        <div
-            class="px-4 py-0 border-b border-border/30 flex items-center justify-between"
-        >
-            <Input
-                value={`Dollar R - ${$settings.dollarRate}`}
-                readonly
-                class="font-mono text-sm bg-muted/50 border-transparent w-[160px] h-9"
-            />
-            <Button
-                variant="outline"
-                size="sm"
-                class="h-9 text-sm bg-muted/50 hover:bg-muted"
-                onclick={handleCopy}
-            >
-                {isCopied ? "Copied" : "Copy"}
-            </Button>
-        </div>
-
-        <CardContent class="p-4 space-y-4 flex-1 overflow-y-auto">
+        <CardContent class="p-3 space-y-3 flex-1 overflow-y-auto">
+            <div class="flex justify-end">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    class="h-7 px-3 text-xs bg-muted/50 hover:bg-muted"
+                    onclick={handleCopy}
+                >
+                    {isCopied ? "Copied" : "Copy"}
+                </Button>
+            </div>
             <Input
                 bind:value={tempDescription}
                 oninput={updateDescription}
                 placeholder="Enter short description"
-                class="h-9 text-sm bg-transparent border-border/40 focus-visible:ring-1"
+                class="h-8 text-sm bg-transparent border-border/40 focus-visible:ring-1"
             />
 
             <!-- Report Text Area - Target for Copy -->
             <div
                 bind:this={reportRef}
-                class="space-y-2 text-sm text-muted-foreground select-text font-mono bg-background/30 p-3 rounded-md border border-border/20"
+                class="space-y-1.5 text-sm text-muted-foreground select-text font-mono bg-background/30 p-2.5 rounded-md border border-border/20"
             >
                 <p>
                     <strong class="text-foreground">Date Range:</strong>

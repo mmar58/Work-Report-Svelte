@@ -41,6 +41,17 @@
                 ? "bg-yellow-500"
                 : "bg-primary",
     );
+
+$effect(() => {
+    console.log(
+        '[WorkGoalTracker] weeklyHours ->',
+        weeklyHours,
+        'targetHours ->',
+        targetHours,
+        'percentage ->',
+        percentage,
+    );
+});
 </script>
 
 <div class="h-full flex flex-col modern-card rounded-xl p-5 gap-4">

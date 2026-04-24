@@ -66,15 +66,43 @@
     let isSettingsOpen = $state(false);
 
     $effect(() => {
-        tempHourlyRate = $settings.hourlyRate;
-        tempTargetHours = $settings.targetHours;
+        const settingsHourlyRate = $settings.hourlyRate;
+        const settingsTargetHours = $settings.targetHours;
+
+        if (!isSettingsOpen) {
+            tempHourlyRate = settingsHourlyRate;
+            tempTargetHours = settingsTargetHours;
+        }
+
+        console.log('[Header] settings sync effect ->', {
+            settingsHourlyRate,
+            settingsTargetHours,
+            isSettingsOpen,
+        });
+    });
+
+    $effect(() => {
+        console.log('[Header] temp target changed ->', tempTargetHours);
+    });
+
+    $effect(() => {
+        console.log('[Header] temp hourly rate changed ->', tempHourlyRate);
     });
 
     async function saveSettings() {
-        await Promise.all([
-            updateHourlyRate(Number(tempHourlyRate)),
-            updateTargetHours(Number(tempTargetHours)),
-        ]);
+        console.log('[Header] saveSettings invoked', { tempHourlyRate, tempTargetHours });
+        isLoading = true;
+        try {
+            const [hourRes, targetRes] = await Promise.all([
+                updateHourlyRate(Number(tempHourlyRate)),
+                updateTargetHours(Number(tempTargetHours)),
+            ]);
+            console.log('[Header] saveSettings results -> hourlyRate:', hourRes, 'targetHours:', targetRes);
+        } catch (e) {
+            console.error('[Header] saveSettings error', e);
+        } finally {
+            isLoading = false;
+        }
     }
 
     // Goal Logic
@@ -360,6 +388,11 @@
                                 id="target-hours"
                                 type="number"
                                 bind:value={tempTargetHours}
+                                oninput={(e: Event) =>
+                                    console.log(
+                                        '[Header] target-hours input change:',
+                                        (e.currentTarget as HTMLInputElement).value,
+                                    )}
                                 class="bg-secondary/50 border-transparent shadow-none"
                             />
                         </div>
@@ -370,8 +403,8 @@
                             {#snippet child({ props })}
                                 <Button
                                     type="submit"
-                                    onclick={saveSettings}
                                     {...props}
+                                    onclick={saveSettings}
                                     class="w-full">Save Changes</Button
                                 >
                             {/snippet}
