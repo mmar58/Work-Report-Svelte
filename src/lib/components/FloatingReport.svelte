@@ -68,7 +68,7 @@
     <Card
         class="w-full h-full shadow-lg border-primary/10 bg-card/50 backdrop-blur-sm flex flex-col"
     >
-        <CardContent class="p-3 space-y-3 flex-1 overflow-y-auto">
+        <CardContent class="px-3 pt-1.5 pb-3 space-y-3 flex-1 overflow-y-auto">
             <div class="flex justify-end">
                 <Button
                     variant="outline"
