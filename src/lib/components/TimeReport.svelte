@@ -108,7 +108,7 @@
             </div>
             {#if $settings.dollarRate > 0}
                 <span
-                    class="text-[9px] text-muted-foreground/60 font-mono mt-0.5"
+                    class="text-[14px] text-muted-foreground/90 font-mono mt-0.5"
                 >
                     1 USD = {formatMoney($settings.dollarRate, "BDT")}
                 </span>

@@ -80,15 +80,45 @@ export async function syncTargetHoursFromAPI() {
 }
 
 export async function updateTargetHours(hours: number) {
+    const num = Number(hours) || 0;
     try {
-        const response = await fetch(`${config.api.baseUrl}/setTargetHours?hours=${hours}`);
+        const response = await fetch(`${config.api.baseUrl}/setTargetHours?hours=${num}`);
         if (response.ok) {
-            targetHours.set(hours);
+            targetHours.set(num);
             return true;
+        } else {
+            console.warn('updateTargetHours: backend responded with non-OK status, attempting localhost fallback and persisting locally.');
+            // Try fallback to localhost in case config resolved to a different host
+            if (!config.api.baseUrl.includes('localhost')) {
+                try {
+                    const fallback = await fetch(`http://localhost:88/setTargetHours?hours=${num}`);
+                    if (fallback.ok) {
+                        targetHours.set(num);
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn('Fallback to localhost failed:', e);
+                }
+            }
+            targetHours.set(num);
+            return false;
         }
-        return false;
     } catch (error) {
-        console.error('Failed to update target hours:', error);
+        console.error('Failed to update target hours (network error):', error);
+        // Try a localhost fallback if initial network call failed
+        if (!config.api.baseUrl.includes('localhost')) {
+            try {
+                const fallback = await fetch(`http://localhost:88/setTargetHours?hours=${num}`);
+                if (fallback.ok) {
+                    targetHours.set(num);
+                    return true;
+                }
+            } catch (e) {
+                console.warn('Fallback to localhost failed:', e);
+            }
+        }
+        // Persist locally so UI reflects the user's change even if backend unavailable
+        targetHours.set(num);
         return false;
     }
 }

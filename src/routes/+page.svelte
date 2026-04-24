@@ -57,6 +57,7 @@
                         class="h-full flex flex-col p-3 gap-3 overflow-y-auto border-r border-border/30"
                     >
                         <div class="flex-none">
+                        <!-- Show current week, estimate earnings and dollar rate -->
                             <TimeReport />
                         </div>
                         <div class="flex-1 min-h-[150px]">
